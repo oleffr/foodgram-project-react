@@ -1,10 +1,8 @@
 from colorfield.fields import ColorField
 from django.core.validators import MinValueValidator
 from django.db import models
-
+from foodgram.settings import FIELD_NUM_1
 from users.models import CustomUser
-
-from foodgram.settings import (FIELD_NUM_1)
 
 
 class Tag(models.Model):
@@ -39,7 +37,6 @@ class Ingredient(models.Model):
     class Meta:
         verbose_name = 'Ингредиент'
         verbose_name_plural = 'Ингредиенты'
-
 
 
 class Recipe(models.Model):

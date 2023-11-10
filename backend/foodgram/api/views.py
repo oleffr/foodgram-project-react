@@ -1,27 +1,26 @@
-from django.shortcuts import get_object_or_404
-from djoser.views import UserViewSet
-from rest_framework import permissions, status
-from rest_framework.decorators import action
-from rest_framework.exceptions import ValidationError
-from rest_framework.response import Response
-from rest_framework import viewsets
-from users.models import CustomUser, Subscription
-from recipes.models import Favorite, SaleList
-from .serializers import (CustomUserSerializer, SubscriptionSerializer,
-                          SubscriptionShowSerializer)
 import csv
 
-from django.http import HttpResponse
-from django_filters.rest_framework import DjangoFilterBackend
-
-from recipes.models import Ingredient, Recipe, RecipeIngredient, Tag
-from .permissions import AuthorOrAdminOrReadOnly
-from .serializers import (CreateRecipeSerializer, FavoriteSerializer,
-                          IngredientSerializer, RecipeSerializer,
-                          SaleListSerializer, TagSerializer)
 from django.db.models import Exists, OuterRef, Sum
-from rest_framework.permissions import (AllowAny)
-from .filters import (RecipeFilter, IngredientFilter)
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
+from djoser.views import UserViewSet
+from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
+                            SaleList, Tag)
+from rest_framework import permissions, status, viewsets
+from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
+from users.models import CustomUser, Subscription
+
+from .filters import IngredientFilter, RecipeFilter
+from .permissions import AuthorOrAdminOrReadOnly
+from .serializers import (CreateRecipeSerializer, CustomUserSerializer,
+                          FavoriteSerializer, IngredientSerializer,
+                          RecipeSerializer, SaleListSerializer,
+                          SubscriptionSerializer, SubscriptionShowSerializer,
+                          TagSerializer)
 
 
 class CustomUserViewSet(UserViewSet):
