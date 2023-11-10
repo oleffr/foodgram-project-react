@@ -4,14 +4,16 @@ from django.db import models
 
 from users.models import CustomUser
 
+from foodgram.settings import (FIELD_NUM_1)
+
 
 class Tag(models.Model):
-    name = models.CharField(max_length=200, verbose_name='Hазвание',
+    name = models.CharField(max_length=FIELD_NUM_1, verbose_name='Hазвание',
                             unique=True, db_index=True)
     color = ColorField(default='#FF0000', max_length=7,
                        verbose_name='цвет', unique=True)
     slug = models.SlugField(
-        max_length=200,
+        max_length=FIELD_NUM_1,
         verbose_name='slug',
         unique=True,
     )
@@ -19,21 +21,17 @@ class Tag(models.Model):
     class Meta:
         verbose_name = 'Тег'
         verbose_name_plural = 'Теги'
-        ordering = ('name',)
-
-    def __str__(self) -> str:
-        return self.slug
 
 
 class Ingredient(models.Model):
     name = models.CharField(
-        max_length=200,
+        max_length=FIELD_NUM_1,
         verbose_name='Hазвание',
         db_index=True,
         blank=False
     )
     measurement_unit = models.CharField(
-        max_length=200,
+        max_length=FIELD_NUM_1,
         verbose_name='Единица измерения',
         blank=False
     )
@@ -41,10 +39,7 @@ class Ingredient(models.Model):
     class Meta:
         verbose_name = 'Ингредиент'
         verbose_name_plural = 'Ингредиенты'
-        ordering = ('name',)
 
-    def __str__(self) -> str:
-        return self.name
 
 
 class Recipe(models.Model):
@@ -67,7 +62,7 @@ class Recipe(models.Model):
         blank=False
     )
     name = models.CharField(
-        max_length=200,
+        max_length=FIELD_NUM_1,
         verbose_name='Hазвание',
         db_index=True,
         blank=False
@@ -93,8 +88,6 @@ class Recipe(models.Model):
         verbose_name_plural = 'Рецепты'
         ordering = ('-pub_date',)
 
-    def __str__(self) -> str:
-        return self.name
 
 
 class RecipeIngredient(models.Model):
@@ -122,8 +115,6 @@ class RecipeIngredient(models.Model):
             ),
         )
 
-    def __str__(self) -> str:
-        return f'{self.recipe} содержит ингредиент/ты {self.ingredient}'
 
 
 class Favorite(models.Model):
@@ -151,9 +142,6 @@ class Favorite(models.Model):
             ),
         )
 
-    def __str__(self) -> str:
-        return f'{self.recipe} в избранном у {self.user}'
-
 
 class SaleList(models.Model):
     recipe = models.ForeignKey(
@@ -179,6 +167,3 @@ class SaleList(models.Model):
                 name='unique_sale_cart'
             ),
         )
-
-    def __str__(self) -> str:
-        return f'{self.recipe} в списке покупок у {self.user}'

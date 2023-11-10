@@ -1,26 +1,22 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
+from foodgram.settings import (FIELD_NUM_1, FIELD_NUM_2)
+
 
 class CustomUser(AbstractUser):
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username', 'first_name', 'last_name', 'password']
-    email = models.EmailField(max_length=254, blank=False,
+    email = models.EmailField(max_length=FIELD_NUM_1, blank=False,
                               verbose_name='email',
                               unique=True)
-    first_name = models.CharField(max_length=150, blank=False,
+    first_name = models.CharField(max_length=FIELD_NUM_2, blank=False,
                                   verbose_name='Имя')
-    last_name = models.CharField(max_length=150, blank=False,
+    last_name = models.CharField(max_length=FIELD_NUM_2, blank=False,
                                  verbose_name='Фамилия'
                                  )
 
     class Meta:
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
-        ordering = ('username',)
-
-    def __str__(self) -> str:
-        return self.username
 
 
 class Subscription(models.Model):
@@ -42,6 +38,3 @@ class Subscription(models.Model):
                 check=~models.Q(subscriber=models.F('author')),
                 name='self_subscribe',
             ))
-
-    def __str__(self) -> str:
-        return f'Пользователь {self.subscriber} подписан на: {self.author}'
