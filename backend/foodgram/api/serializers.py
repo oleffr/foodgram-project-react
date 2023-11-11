@@ -145,7 +145,7 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
         model = Recipe
         fields = ('id', 'ingredients', 'tags',
                   'image', 'name', 'text', 'cooking_time', 'author')
-    
+
     def validate_image(self, image):
         if not image:
             raise serializers.ValidationError(

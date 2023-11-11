@@ -1,8 +1,9 @@
 from colorfield.fields import ColorField
 from django.core.validators import MinValueValidator
 from django.db import models
-from foodgram.settings import FIELD_NUM_1
 from users.models import CustomUser
+
+from foodgram.settings import FIELD_NUM_1
 
 
 class Tag(models.Model):
@@ -86,7 +87,6 @@ class Recipe(models.Model):
         ordering = ('-pub_date',)
 
 
-
 class RecipeIngredient(models.Model):
     ingredient = models.ForeignKey(
         Ingredient,
@@ -111,7 +111,6 @@ class RecipeIngredient(models.Model):
                 name='unique_recipe_ingredient'
             ),
         )
-
 
 
 class Favorite(models.Model):

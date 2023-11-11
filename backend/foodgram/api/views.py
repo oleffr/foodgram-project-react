@@ -113,9 +113,16 @@ class RecipeViewSet(viewsets.ModelViewSet):
         if user.is_authenticated:
             return (Recipe.objects.all().select_related('author')
                     .annotate(is_favorited=Exists(
-                        Favorite.objects.filter(recipe=OuterRef('pk')).select_related('user')
+                        Favorite.objects.filter(recipe=OuterRef('pk'))
+                        .select_related('user')
                     ))
-                    .annotate(is_in_shopping_cart=Exists(SaleList.objects.filter(recipe=OuterRef('pk')).select_related('user')))
+                    .annotate(is_in_shopping_cart=Exists(SaleList.objects
+                                                         .filter(
+                                                             recipe=OuterRef(
+                                                                 'pk'))
+                                                         .select_related(
+                                                             'user')
+                                                         ))
                     .prefetch_related('tags', 'ingredients')
                     )
         return (Recipe.objects.all().select_related('author')
@@ -152,7 +159,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         else:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
         return Response(status=status.HTTP_204_NO_CONTENT)
-    
+
     @action(
         detail=True,
         methods=['post', 'delete'],
@@ -170,7 +177,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             )
         model = FavoriteSerializer.Meta.model
         if self.request.user.is_authenticated:
-            queryset = model.objects.filter(user=request.user, 
+            queryset = model.objects.filter(user=request.user,
                                             recipe=get_object_or_404(
                                                 Recipe, pk=pk))
             if not queryset.exists():
