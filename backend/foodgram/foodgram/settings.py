@@ -1,18 +1,28 @@
 import os
 from pathlib import Path
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 FIELD_NUM_1 = 200
 FIELD_NUM_2 = 150
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 AUTH_USER_MODEL = 'users.CustomUser'
 
-SECRET_KEY = 'django-insecure-8ysow*kmkt)0i$(j_ns!vg9cec)9630ah+2x)b9)9w2i%oy&kk'
+#SECRET_KEY = 'django-insecure-8ysow*kmkt)0i$(j_ns!vg9cec)9630ah+2x)b9)9w2i%oy&kk'
 
-DEBUG = True
+#DEBUG = True
 
-ALLOWED_HOSTS = []
+#ALLOWED_HOSTS = []
+#ALLOWED_HOSTS = ['158.160.23.1', '127.0.0.1', 'localhost', 'foodgram-oleffr.hopto.org']
 
+SECRET_KEY = os.getenv("SECRET_KEY")
+
+DEBUG = os.getenv("DEBUG") == 'True'
+
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS").split(', ')
 
 INSTALLED_APPS = [
     'django.contrib.admin',

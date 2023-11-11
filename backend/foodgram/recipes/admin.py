@@ -19,16 +19,9 @@ class IngredientAdmin(admin.ModelAdmin):
     search_fields = ('name',)
 
 
-# class RecipeIngredientInline(admin.TabularInline):
-#     model = RecipeIngredient
-#     extra = 0
-#     min_num = 1
-
-
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
     list_display = ('pk', 'name', 'author', 'count_favorite',)
-    # inlines = [RecipeIngredientInline, ]
     list_filter = ('author', 'name', 'tags')
     search_fields = ('author', 'name',)
 
