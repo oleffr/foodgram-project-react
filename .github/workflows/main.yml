@@ -54,7 +54,7 @@ jobs:
       - name: Push to DockerHub
         uses: docker/build-push-action@v4
         with:
-          context: ./backend/
+          context: ./backend/foodgram/
           push: true
           tags: oleffr/foodgram_backend:latest
   build_frontend_and_push_to_docker_hub:
@@ -128,9 +128,9 @@ jobs:
           sudo docker compose -f docker-compose.production.yml pull
           sudo docker compose -f docker-compose.production.yml down
           sudo docker compose -f docker-compose.production.yml up -d
-          sudo docker compose -f docker-compose.production.yml exec backend/foodgram python manage.py migrate
-          sudo docker compose -f docker-compose.production.yml exec backend/foodgram python manage.py collectstatic
-          sudo docker compose -f docker-compose.production.yml exec backend/foodgram cp -r /app/static/. /backend_static/static/
+          sudo docker compose -f docker-compose.production.yml exec backend python manage.py migrate
+          sudo docker compose -f docker-compose.production.yml exec backend python manage.py collectstatic
+          sudo docker compose -f docker-compose.production.yml exec backend cp -r /app/static/. /backend_static/static/
   send_message:
     runs-on: ubuntu-latest
     needs: deploy
