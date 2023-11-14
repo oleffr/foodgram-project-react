@@ -31,7 +31,7 @@ services:
     build: ./nginx/
     env_file: .env
     ports:
-      - 9000:80
+      - 8090:80
     volumes:
       - ./docs/:/var/www/html/api/docs/
       - static:/var/www/html/
