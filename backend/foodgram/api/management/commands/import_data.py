@@ -1,10 +1,9 @@
-import os
 import json
 import logging
+import os
 
 from django.core.management.base import BaseCommand
 from recipes.models import Ingredient
-
 
 logging.basicConfig(
     level=logging.INFO,
@@ -19,12 +18,13 @@ class Command(BaseCommand):
         logger.info('Импорт начался')
         try:
             with open(
-                    os.path.join(os.path.dirname(__file__), 'ingredients.json'),
+                    os.path.join(os.path.dirname(__file__),
+                                 'ingredients.json'),
                     'r',
                     encoding='utf-8') as file:
                 data = json.load(file)
                 Ingredient.objects.bulk_create(Ingredient(**line
                                                           ) for line in data)
-            logger.info(f'Данные загружены')
+            logger.info('Данные загружены')
         except Exception as error:
             logger.error(error)
