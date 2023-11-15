@@ -19,7 +19,7 @@ class Command(BaseCommand):
         logger.info('Импорт начался')
         try:
             with open(
-                    os.path.join(os.path.dirname(__file__), 'ingredients.csv'),
+                    os.path.join(os.path.dirname(__file__), 'ingredients.json'),
                     'r',
                     encoding='utf-8') as file:
                 data = json.load(file)
