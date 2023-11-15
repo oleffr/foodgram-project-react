@@ -1,9 +1,8 @@
 from colorfield.fields import ColorField
 from django.core.validators import MinValueValidator
 from django.db import models
-from users.models import CustomUser
-
 from foodgram.settings import FIELD_NUM_1
+from users.models import CustomUser
 
 
 class Tag(models.Model):

@@ -1,6 +1,5 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-
 from foodgram.settings import FIELD_NUM_1, FIELD_NUM_2
 
 
