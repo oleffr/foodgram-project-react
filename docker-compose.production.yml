@@ -29,7 +29,8 @@ services:
     ports:
       - "8090:80"
     volumes:
-      - static:/backend_static/
-      - media:/app/media/
+      - ./docs/:/var/www/html/api/docs/
+      - static:/var/www/html/
+      - media:/var/www/media/
     depends_on:
       - backend
