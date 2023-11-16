@@ -25,7 +25,7 @@ services:
     volumes:
       - static:/app/result_build/build/
   nginx:
-    image: oleffr/foodgram_nginx
+    image: nginx:1.19.3
     ports:
       - "8090:80"
     volumes:
