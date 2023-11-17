@@ -15,7 +15,6 @@ services:
     image: oleffr/foodgram_backend
     env_file: .env
     volumes:
-      volumes:
       - ./data/:/app/data
       - static:/static
       - media:/app/media
