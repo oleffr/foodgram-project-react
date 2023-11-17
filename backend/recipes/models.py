@@ -1,8 +1,9 @@
 from colorfield.fields import ColorField
 from django.core.validators import MinValueValidator
 from django.db import models
-from backend.settings import FIELD_NUM_1
 from users.models import CustomUser
+
+from backend.settings import FIELD_NUM_1
 
 
 class Tag(models.Model):
