@@ -12,20 +12,22 @@ services:
     volumes:
       - pg_data:/var/lib/postgresql/data
   backend:
-    image: oleffr/foodgram_backend
+    image: oleffr/kittygram_backend
     env_file: .env
     volumes:
       - static:/static/
       - media:/app/media/
   frontend:
-    image: oleffr/foodgram_frontend
-    volumes:
-      - static:/app/result_build/build/
-  nginx:
-    image: oleffr/foodgram_nginx
+    image: oleffr/kittygram_frontend
     env_file: .env
-    ports:
-      - "8090:80"
+    command: cp -r /app/build/. /static/
+    volumes:
+      - static:/static
+  gateway:
+    image: oleffr/kittygram_gateway
+    env_file: .env
     volumes:
       - static:/static/
       - media:/app/media/
+    ports:
+      - 9000:80
