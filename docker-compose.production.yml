@@ -15,8 +15,10 @@ services:
     image: oleffr/foodgram_backend
     env_file: .env
     volumes:
-      - static:/static/
-      - media:/app/media/
+      volumes:
+      - ./data/:/app/data
+      - static:/static
+      - media:/app/media
   frontend:
     image: oleffr/foodgram_frontend
     volumes:
@@ -27,5 +29,6 @@ services:
     ports:
       - "8090:80"
     volumes:
-      - static:/static/
-      - media:/app/media/
+      - ./docs/:/var/www/html/api/docs/
+      - static:/var/www/html/
+      - media:/var/www/media/
