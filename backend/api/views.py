@@ -164,10 +164,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
     @action(
         detail=True,
         methods=['post', 'delete'],
-        url_path='favorite',
-        url_name='favorite',
     )
-    def get_favorite(self, request, pk):
+    def get_favorites(self, request, pk):
         if request.method == 'POST':
             data = {'user': request.user.id, 'recipe': pk}
             serializer = FavoriteSerializer(data=data)
