@@ -8,7 +8,7 @@ from rest_framework.validators import UniqueTogetherValidator
 from users.models import CustomUser, Subscription
 
 
-class CustomUserSerializer(UserSerializer):
+class UserSerializer(UserSerializer):
     """Сериализация для отображения пользователей"""
     is_subscribed = serializers.BooleanField(default=False)
 
@@ -19,7 +19,7 @@ class CustomUserSerializer(UserSerializer):
         read_only_fields = ('id',)
 
 
-class CreateCustomUserSerializer(UserCreateSerializer):
+class CreateUserSerializer(UserCreateSerializer):
     """Сериализация для создания пользователей"""
     class Meta(UserCreateSerializer.Meta):
         model = CustomUser
@@ -49,18 +49,18 @@ class SubscriptionSerializer(serializers.ModelSerializer):
         return data
 
     def to_representation(self, instance):
-        return SubscriptionShowSerializer(
+        return SubscriptionPresentSerializer(
             instance.author,
             context=self.context
         ).data
 
 
-class SubscriptionShowSerializer(CustomUserSerializer):
+class SubscriptionPresentSerializer(UserSerializer):
     recipes = serializers.SerializerMethodField()
     recipes_count = serializers.SerializerMethodField()
 
-    class Meta(CustomUserSerializer.Meta):
-        fields = CustomUserSerializer.Meta.fields + (
+    class Meta(UserSerializer.Meta):
+        fields = UserSerializer.Meta.fields + (
             'recipes',
             'recipes_count'
         )
@@ -73,7 +73,7 @@ class SubscriptionShowSerializer(CustomUserSerializer):
 
     def get_recipes(self, object):
         author_recipes = self.recipes_limit(object.recipes.all())
-        return RecipeShortSerializer(
+        return RecipePresentSerializer(
             author_recipes, many=True
         ).data
 
@@ -113,7 +113,7 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'measurement_unit', 'amount')
 
 
-class RecipeShortSerializer(serializers.ModelSerializer):
+class RecipePresentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
         fields = ('id', 'name', 'image', 'cooking_time')
@@ -121,7 +121,7 @@ class RecipeShortSerializer(serializers.ModelSerializer):
 
 class RecipeSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True, read_only=True)
-    author = CustomUserSerializer(read_only=True)
+    author = UserSerializer(read_only=True)
     ingredients = RecipeIngredientSerializer(
         many=True, read_only=True, source='recipeingredient_set')
     is_favorited = serializers.BooleanField(default=False)
@@ -137,7 +137,7 @@ class RecipeSerializer(serializers.ModelSerializer):
 class CreateRecipeSerializer(serializers.ModelSerializer):
     ingredients = CreateRecipeIngredientSerializer(many=True)
     image = Base64ImageField(use_url=True, max_length=None)
-    author = CustomUserSerializer(read_only=True)
+    author = UserSerializer(read_only=True)
     tags = serializers.PrimaryKeyRelatedField(many=True,
                                               queryset=Tag.objects.all())
 
@@ -232,12 +232,12 @@ class FavoriteSerializer(serializers.ModelSerializer):
         ]
 
     def to_representation(self, instance):
-        return RecipeShortSerializer(
+        return RecipePresentSerializer(
             instance.recipe
         ).data
 
 
-class SaleListSerializer(serializers.ModelSerializer):
+class ShoppingCartSerializer(serializers.ModelSerializer):
     recipe = serializers.PrimaryKeyRelatedField(queryset=Recipe.objects.all())
     user = serializers.PrimaryKeyRelatedField(
         queryset=CustomUser.objects.all())
@@ -254,6 +254,6 @@ class SaleListSerializer(serializers.ModelSerializer):
         ]
 
     def to_representation(self, instance):
-        return RecipeShortSerializer(
+        return RecipePresentSerializer(
             instance.recipe
         ).data

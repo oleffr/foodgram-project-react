@@ -32,5 +32,5 @@ class SubscriptionAdmin(admin.ModelAdmin):
     search_fields = ('author',)
 
 
-admin.site.site_title = 'Администрирование Продуктового помошника'
-admin.site.site_header = 'Администрирование Продуктового помошника'
+admin.site.site_title = 'Администрирование Foodgram'
+admin.site.site_header = 'Администрирование Foodgram'

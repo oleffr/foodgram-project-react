@@ -43,7 +43,7 @@ class FavoriteAdmin(admin.ModelAdmin):
 
 
 @admin.register(SaleList)
-class SaleListAdmin(admin.ModelAdmin):
+class ShoppingCartAdmin(admin.ModelAdmin):
     list_display = ('pk', 'user', 'recipe',)
     list_filter = ('user',)
     search_fields = ('user',)

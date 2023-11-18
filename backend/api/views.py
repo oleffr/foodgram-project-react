@@ -16,15 +16,16 @@ from users.models import CustomUser, Subscription
 
 from .filters import IngredientFilter, RecipeFilter
 from .permissions import AuthorOrAdminOrReadOnly
-from .serializers import (CreateRecipeSerializer, CustomUserSerializer,
+from .serializers import (CreateRecipeSerializer, UserSerializer,
                           FavoriteSerializer, IngredientSerializer,
-                          RecipeSerializer, SaleListSerializer,
-                          SubscriptionSerializer, SubscriptionShowSerializer,
+                          RecipeSerializer, ShoppingCartSerializer,
+                          SubscriptionSerializer,
+                          SubscriptionPresentSerializer,
                           TagSerializer)
 
 
-class CustomUserViewSet(UserViewSet):
-    serializer_class = CustomUserSerializer
+class UserViewSet(UserViewSet):
+    serializer_class = UserSerializer
 
     def get_queryset(self):
         user = self.request.user
@@ -40,7 +41,7 @@ class CustomUserViewSet(UserViewSet):
         if self.action == 'to_subscribe':
             return SubscriptionSerializer
         if self.action == 'get_subscription_list':
-            return SubscriptionShowSerializer
+            return SubscriptionPresentSerializer
         return super().get_serializer_class()
 
     @action(
@@ -142,13 +143,13 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def get_shopping_cart(self, request, pk):
         if request.method == 'POST':
             data = {'user': request.user.id, 'recipe': pk}
-            serializer = SaleListSerializer(data=data)
+            serializer = ShoppingCartSerializer(data=data)
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(
                 serializer.data, status=status.HTTP_201_CREATED
             )
-        model = SaleListSerializer.Meta.model
+        model = ShoppingCartSerializer.Meta.model
         if self.request.user.is_authenticated:
             queryset = model.objects.filter(user=request.user,
                                             recipe=get_object_or_404(
@@ -194,7 +195,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
         url_name='download_shopping_cart',
     )
     def download_shopping_cart(self, request):
-        """загрузка списка покупок"""
         ingredients_cart = (
             RecipeIngredient.objects.filter(
                 recipe__sale_cart__user=request.user
