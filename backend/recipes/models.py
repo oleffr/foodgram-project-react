@@ -1,7 +1,7 @@
 from colorfield.fields import ColorField
 from django.core.validators import MinValueValidator
 from django.db import models
-from users.models import CustomUser
+from users.models import User
 
 from backend.settings import FIELD_NUM_1
 
@@ -70,7 +70,7 @@ class Recipe(models.Model):
         verbose_name='Время приготовления (в минутах)',
         validators=[MinValueValidator(1)],)
     author = models.ForeignKey(
-        CustomUser,
+        User,
         on_delete=models.CASCADE,
         related_name='recipes',
         verbose_name='Автор'
@@ -121,7 +121,7 @@ class Favorite(models.Model):
         verbose_name='Рецепт'
     )
     user = models.ForeignKey(
-        CustomUser,
+        User,
         on_delete=models.CASCADE,
         related_name='favoriting',
         verbose_name='Пользователь'
@@ -139,7 +139,7 @@ class Favorite(models.Model):
         )
 
 
-class SaleList(models.Model):
+class ShoppingCart(models.Model):
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
@@ -147,7 +147,7 @@ class SaleList(models.Model):
         verbose_name='Рецепт'
     )
     user = models.ForeignKey(
-        CustomUser,
+        User,
         on_delete=models.CASCADE,
         related_name='sale_cart',
         verbose_name='Пользователь'

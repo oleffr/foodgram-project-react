@@ -2,10 +2,10 @@ from django.db import transaction
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from drf_extra_fields.fields import Base64ImageField
 from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
-                            SaleList, Tag)
+                            ShoppingCart, Tag)
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
-from users.models import CustomUser, Subscription
+from users.models import User, Subscription
 
 
 class UserSerializer(UserSerializer):
@@ -13,7 +13,7 @@ class UserSerializer(UserSerializer):
     is_subscribed = serializers.BooleanField(default=False)
 
     class Meta(UserSerializer.Meta):
-        model = CustomUser
+        model = User
         fields = ('email', 'id', 'username', 'first_name',
                   'last_name', 'is_subscribed')
         read_only_fields = ('id',)
@@ -22,7 +22,7 @@ class UserSerializer(UserSerializer):
 class CreateUserSerializer(UserCreateSerializer):
     """Сериализация для создания пользователей"""
     class Meta(UserCreateSerializer.Meta):
-        model = CustomUser
+        model = User
         fields = ('email', 'id', 'username',
                   'first_name', 'last_name', 'password')
         extra_kwargs = {"password": {"write_only": True}}
@@ -217,7 +217,7 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
 
 class FavoriteSerializer(serializers.ModelSerializer):
     user = serializers.PrimaryKeyRelatedField(
-        queryset=CustomUser.objects.all())
+        queryset=User.objects.all())
     recipe = serializers.PrimaryKeyRelatedField(queryset=Recipe.objects.all())
 
     class Meta:
@@ -240,14 +240,14 @@ class FavoriteSerializer(serializers.ModelSerializer):
 class ShoppingCartSerializer(serializers.ModelSerializer):
     recipe = serializers.PrimaryKeyRelatedField(queryset=Recipe.objects.all())
     user = serializers.PrimaryKeyRelatedField(
-        queryset=CustomUser.objects.all())
+        queryset=User.objects.all())
 
     class Meta:
-        model = SaleList
+        model = ShoppingCart
         fields = ('user', 'recipe')
         validators = [
             UniqueTogetherValidator(
-                queryset=SaleList.objects.all(),
+                queryset=ShoppingCart.objects.all(),
                 fields=('user', 'recipe'),
                 message='Рецепт уже в списке'
             )

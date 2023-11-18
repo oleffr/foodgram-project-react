@@ -4,7 +4,7 @@ from django.db import models
 from backend.settings import FIELD_NUM_1, FIELD_NUM_2
 
 
-class CustomUser(AbstractUser):
+class User(AbstractUser):
     email = models.EmailField(max_length=FIELD_NUM_1, blank=False,
                               verbose_name='email',
                               unique=True)
@@ -20,10 +20,10 @@ class CustomUser(AbstractUser):
 
 
 class Subscription(models.Model):
-    subscriber = models.ForeignKey(CustomUser, on_delete=models.CASCADE,
+    subscriber = models.ForeignKey(User, on_delete=models.CASCADE,
                                    related_name='subscriber',
                                    verbose_name='Подписчик')
-    author = models.ForeignKey(CustomUser, on_delete=models.CASCADE,
+    author = models.ForeignKey(User, on_delete=models.CASCADE,
                                related_name='author',
                                verbose_name='Автор')
 

@@ -6,13 +6,13 @@ from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
 from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
-                            SaleList, Tag)
+                            ShoppingCart, Tag)
 from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from users.models import CustomUser, Subscription
+from users.models import User, Subscription
 
 from .filters import IngredientFilter, RecipeFilter
 from .permissions import AuthorOrAdminOrReadOnly
@@ -51,7 +51,7 @@ class UserViewSet(UserViewSet):
         url_name='subscribe',
     )
     def to_subscribe(self, request, id):
-        author = get_object_or_404(CustomUser, id=id)
+        author = get_object_or_404(User, id=id)
         if request.method == 'POST':
             data = {'subscriber': request.user.id, 'author': author.id}
             serializer = self.get_serializer(data=data)
@@ -74,7 +74,7 @@ class UserViewSet(UserViewSet):
         url_name='subscriptions'
     )
     def get_subscription_list(self, request):
-        authors = CustomUser.objects.filter(author__subscriber=request.user)
+        authors = User.objects.filter(author__subscriber=request.user)
         result_pages = self.paginate_queryset(
             queryset=authors
         )
@@ -117,7 +117,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
                         Favorite.objects.filter(recipe=OuterRef('pk'))
                         .select_related('user')
                     ))
-                    .annotate(is_in_shopping_cart=Exists(SaleList.objects
+                    .annotate(is_in_shopping_cart=Exists(ShoppingCart.objects
                                                          .filter(
                                                              recipe=OuterRef(
                                                                  'pk'))
