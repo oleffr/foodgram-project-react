@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='shoppingcart',
             name='user',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='sale_cart', to=settings.AUTH_USER_MODEL, verbose_name='Пользователь'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='shopping_cart', to=settings.AUTH_USER_MODEL, verbose_name='Пользователь'),
         ),
         migrations.AddField(
             model_name='recipeingredient',
@@ -57,7 +57,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddConstraint(
             model_name='shoppingcart',
-            constraint=models.UniqueConstraint(fields=('user', 'recipe'), name='unique_sale_cart'),
+            constraint=models.UniqueConstraint(fields=('user', 'recipe'), name='unique_shopping_cart'),
         ),
         migrations.AddConstraint(
             model_name='recipeingredient',
