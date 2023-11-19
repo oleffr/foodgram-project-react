@@ -205,12 +205,11 @@ class RecipeViewSet(viewsets.ModelViewSet):
                        ).order_by('ingredient__name')
         )
         if not ingredients_cart.exists():
-            raise ValidationError({'errors': 'Корзина пуста'})
-        response = HttpResponse(content_type="text/csv",
-                                headers={'Content-Disposition':
-                                         'attachment;filename="shop_list.csv"'
-                                         },
-                                )
+            raise ValidationError('В списке покупок нет добавленных рецептов')
+        response = HttpResponse(
+            content_type="text/csv",
+            headers={'Content-Disposition':
+                     'attachment;filename="shopping_cart.csv"'},)
         writer = csv.DictWriter(response,
                                 fieldnames=ingredients_cart.first().keys())
         writer.writeheader()

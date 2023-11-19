@@ -1,16 +1,22 @@
 from django.contrib import admin
 
-from .models import (Favorite, Ingredient, Recipe, RecipeIngredient,
+from .models import (Favorite,
+                     Ingredient,
+                     Recipe,
+                     RecipeIngredient,
                      ShoppingCart,
                      Tag)
 
 
-@admin.register(Tag)
-class TagAdmin(admin.ModelAdmin):
-    list_display = ('pk', 'name', 'color', 'slug')
-    list_filter = ('name',)
-    search_fields = ('name',)
-    prepopulated_fields = {'slug': ('name',)}
+@admin.register(Recipe)
+class RecipeAdmin(admin.ModelAdmin):
+    list_display = ('pk', 'name', 'author', 'counter_in_favorite',)
+    list_filter = ('author', 'name', 'tags')
+    search_fields = ('author', 'name',)
+
+    def counter_in_favorite(self, object):
+        return object.favoriting.count()
+    counter_in_favorite.short_description = 'Сколько раз добавили в избранное'
 
 
 @admin.register(Ingredient)
@@ -20,20 +26,17 @@ class IngredientAdmin(admin.ModelAdmin):
     search_fields = ('name',)
 
 
-@admin.register(Recipe)
-class RecipeAdmin(admin.ModelAdmin):
-    list_display = ('pk', 'name', 'author', 'count_favorite',)
-    list_filter = ('author', 'name', 'tags')
-    search_fields = ('author', 'name',)
-
-    def count_favorite(self, object):
-        return object.favoriting.count()
-    count_favorite.short_description = 'Количество добавлений в избранное'
-
-
 @admin.register(RecipeIngredient)
 class RecipeIngredientstAdmin(admin.ModelAdmin):
     list_display = ('pk', 'ingredient', 'amount', 'recipe')
+
+
+@admin.register(Tag)
+class TagAdmin(admin.ModelAdmin):
+    list_display = ('pk', 'name', 'color', 'slug')
+    list_filter = ('name',)
+    search_fields = ('name',)
+    prepopulated_fields = {'slug': ('name',)}
 
 
 @admin.register(Favorite)
