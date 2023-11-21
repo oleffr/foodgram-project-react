@@ -15,6 +15,7 @@ services:
     image: oleffr/foodgram_backend
     env_file: .env
     volumes:
+      - ./data/:/app/data
       - static:/static/
       - media:/app/media/
   frontend:
@@ -26,6 +27,7 @@ services:
     image: oleffr/foodgram_nginx
     env_file: .env
     volumes:
+      - ./docs/:/var/www/html/api/docs/
       - static:/static/
       - media:/app/media/
     ports:
