@@ -6,8 +6,27 @@ from users.models import User
 from backend.settings import FIELD_NUM_1
 
 
+class Ingredient(models.Model):
+    name = models.CharField(
+        max_length=FIELD_NUM_1,
+        verbose_name='Hазвание ингредиента',
+        db_index=True,
+        blank=False
+    )
+    measurement_unit = models.CharField(
+        max_length=FIELD_NUM_1,
+        verbose_name='Единица измерения ингредиента',
+        blank=False
+    )
+
+    class Meta:
+        verbose_name = 'Ингредиент'
+        verbose_name_plural = 'Ингредиенты'
+
+
 class Tag(models.Model):
-    name = models.CharField(max_length=FIELD_NUM_1, verbose_name='Hазвание',
+    name = models.CharField(max_length=FIELD_NUM_1,
+                            verbose_name='Hазвание тега',
                             unique=True, db_index=True)
     color = ColorField(default='#FF0000', max_length=7,
                        verbose_name='цвет', unique=True)
@@ -20,24 +39,6 @@ class Tag(models.Model):
     class Meta:
         verbose_name = 'Тег'
         verbose_name_plural = 'Теги'
-
-
-class Ingredient(models.Model):
-    name = models.CharField(
-        max_length=FIELD_NUM_1,
-        verbose_name='Hазвание',
-        db_index=True,
-        blank=False
-    )
-    measurement_unit = models.CharField(
-        max_length=FIELD_NUM_1,
-        verbose_name='Единица измерения',
-        blank=False
-    )
-
-    class Meta:
-        verbose_name = 'Ингредиент'
-        verbose_name_plural = 'Ингредиенты'
 
 
 class Recipe(models.Model):
@@ -77,14 +78,14 @@ class Recipe(models.Model):
     )
     pub_date = models.DateTimeField(
         auto_now_add=True,
-        verbose_name='Дата публикации',
+        verbose_name='Дата создания',
         db_index=True
     )
 
     class Meta:
         verbose_name = 'Рецепт'
         verbose_name_plural = 'Рецепты'
-        ordering = ('-pub_date',)
+        ordering = ['-pub_date',]
 
 
 class RecipeIngredient(models.Model):
@@ -99,42 +100,16 @@ class RecipeIngredient(models.Model):
         verbose_name='Рецепт'
     )
     amount = models.PositiveSmallIntegerField(
-        verbose_name='Количество',
+        verbose_name='Количество ингредиента',
         validators=[MinValueValidator(1)],)
 
     class Meta:
-        verbose_name = 'Соответствие ингредиента и рецепта'
-        verbose_name_plural = 'Таблица соответствия ингредиентов и рецептов'
+        verbose_name = 'Соответствие ингредиента рецепту'
+        verbose_name_plural = 'Соответствия ингредиентов рецептам'
         constraints = (
             models.UniqueConstraint(
                 fields=['recipe', 'ingredient'],
                 name='unique_recipe_ingredient'
-            ),
-        )
-
-
-class Favorite(models.Model):
-    recipe = models.ForeignKey(
-        Recipe,
-        on_delete=models.CASCADE,
-        related_name='favoriting',
-        verbose_name='Рецепт'
-    )
-    user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='favoriting',
-        verbose_name='Пользователь'
-    )
-
-    class Meta:
-        verbose_name = 'Избранное'
-        verbose_name_plural = 'Избранное'
-        ordering = ('user', 'recipe',)
-        constraints = (
-            models.UniqueConstraint(
-                fields=['user', 'recipe'],
-                name='unique_favorite_recipe'
             ),
         )
 
@@ -161,5 +136,30 @@ class ShoppingCart(models.Model):
             models.UniqueConstraint(
                 fields=['user', 'recipe'],
                 name='unique_shopping_cart'
+            ),
+        )
+
+
+class Favorite(models.Model):
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        related_name='favoriting',
+        verbose_name='Рецепт'
+    )
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='favoriting',
+        verbose_name='Пользователь'
+    )
+
+    class Meta:
+        verbose_name = 'Избранное'
+        ordering = ('user', 'recipe',)
+        constraints = (
+            models.UniqueConstraint(
+                fields=['user', 'recipe'],
+                name='unique_favorite_recipe'
             ),
         )

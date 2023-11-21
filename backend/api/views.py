@@ -5,7 +5,7 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
-from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
+from recipes.models import (Favorite, Ingredient, Recipe,
                             ShoppingCart, Tag)
 from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
@@ -54,17 +54,17 @@ class UserViewSet(UserViewSet):
         author = get_object_or_404(User, id=id)
         if request.method == 'POST':
             data = {'subscriber': request.user.id, 'author': author.id}
-            serializer = self.get_serializer(data=data)
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
+            self.get_serializer(data=data).is_valid(raise_exception=True)
+            self.get_serializer(data=data).save()
             return Response(
-                serializer.data, status=status.HTTP_201_CREATED
+                self.get_serializer(data=data).data,
+                status=status.HTTP_201_CREATED
             )
-        subscription = Subscription.objects.filter(subscriber=request.user,
-                                                   author=author)
-        if not subscription.exists():
+        if not Subscription.objects.filter(subscriber=request.user,
+                                           author=author).exists():
             raise ValidationError('Такой подписки нет')
-        subscription.delete()
+        Subscription.objects.filter(subscriber=request.user,
+                                    author=author).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
@@ -75,29 +75,25 @@ class UserViewSet(UserViewSet):
     )
     def get_subscription_list(self, request):
         authors = User.objects.filter(author__subscriber=request.user)
-        result_pages = self.paginate_queryset(
-            queryset=authors
-        )
-        serializer = self.get_serializer(result_pages, many=True)
+        serializer = self.get_serializer(self.paginate_queryset(
+            queryset=authors), many=True)
         return self.get_paginated_response(serializer.data)
 
 
-class TagViewSet(viewsets.ReadOnlyModelViewSet):
-
-    queryset = Tag.objects.all()
-    serializer_class = TagSerializer
-    pagination_class = None
-    permission_classes = (AllowAny, )
-
-
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
-
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     filter_backends = (DjangoFilterBackend,)
     search_fields = ['name']
     pagination_class = None
     filterset_class = IngredientFilter
+    permission_classes = (AllowAny, )
+
+
+class TagViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Tag.objects.all()
+    serializer_class = TagSerializer
+    pagination_class = None
     permission_classes = (AllowAny, )
 
 
@@ -143,11 +139,11 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def get_shopping_cart(self, request, pk):
         if request.method == 'POST':
             data = {'user': request.user.id, 'recipe': pk}
-            serializer = ShoppingCartSerializer(data=data)
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
+            ShoppingCartSerializer(data=data).is_valid(raise_exception=True)
+            ShoppingCartSerializer(data=data).save()
             return Response(
-                serializer.data, status=status.HTTP_201_CREATED
+                ShoppingCartSerializer(data=data).data,
+                status=status.HTTP_201_CREATED
             )
         model = ShoppingCartSerializer.Meta.model
         if self.request.user.is_authenticated:
@@ -170,11 +166,11 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def get_favorite(self, request, pk):
         if request.method == 'POST':
             data = {'user': request.user.id, 'recipe': pk}
-            serializer = FavoriteSerializer(data=data)
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
+            FavoriteSerializer(data=data).is_valid(raise_exception=True)
+            FavoriteSerializer(data=data).save()
             return Response(
-                serializer.data, status=status.HTTP_201_CREATED
+                FavoriteSerializer(data=data).data,
+                status=status.HTTP_201_CREATED
             )
         model = FavoriteSerializer.Meta.model
         if self.request.user.is_authenticated:
@@ -196,12 +192,12 @@ class RecipeViewSet(viewsets.ModelViewSet):
     )
     def download_shopping_cart(self, request):
         ingredients_cart = (
-            RecipeIngredient.objects.filter(
+            Recipe.ingredients.through.objects.filter(
                 recipe__shopping_cart__user=request.user
             ).values(
                 'ingredient__name',
                 'ingredient__measurement_unit',
-            ).annotate(ingredient_value=Sum('amount')
+            ).annotate(amount=Sum('amount')
                        ).order_by('ingredient__name')
         )
         if not ingredients_cart.exists():

@@ -5,7 +5,7 @@ from .models import User, Subscription
 
 
 @admin.register(User)
-class CustomUserAdmin(UserAdmin):
+class UserAdmin(UserAdmin):
     add_fieldsets = (
         (
             None,
@@ -28,7 +28,7 @@ class CustomUserAdmin(UserAdmin):
 class SubscriptionAdmin(admin.ModelAdmin):
     list_display = ('pk', 'author', 'subscriber')
     list_filter = ('author', 'subscriber')
-    list_per_page = 5
+    list_per_page = 10
     search_fields = ('author',)
 
 

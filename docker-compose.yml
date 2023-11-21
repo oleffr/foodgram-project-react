@@ -18,8 +18,6 @@ services:
       - ./data/:/app/data
       - static:/backend_static
       - media:/app/media/
-    depends_on:
-      - db
   frontend:
     env_file: .env
     build:
@@ -36,5 +34,3 @@ services:
       - ./docs/:/var/www/html/api/docs/
       - static:/var/www/html/
       - media:/var/www/media/
-    depends_on:
-      - backend
