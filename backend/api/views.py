@@ -188,7 +188,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     )
     def download_shopping_cart(self, request):
         if not (
-            RecipeIngredient.objects.through.objects.filter(
+            RecipeIngredient.objects.filter(
                 recipe__shopping_cart__user=request.user
             ).values(
                 'ingredient__name',
@@ -198,7 +198,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         ).exists():
             raise ValidationError('В списке покупок нет добавленных рецептов')
         download_csv(
-            RecipeIngredient.objects.through.objects.filter(
+            RecipeIngredient.objects.filter(
                 recipe__shopping_cart__user=request.user
             ).values(
                 'ingredient__name',
