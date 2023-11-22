@@ -197,7 +197,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
                        ).order_by('ingredient__name')
         ).exists():
             raise ValidationError('В списке покупок нет добавленных рецептов')
-        download_csv(
+        response = download_csv(
             RecipeIngredient.objects.filter(
                 recipe__shopping_cart__user=request.user
             ).values(
@@ -206,3 +206,4 @@ class RecipeViewSet(viewsets.ModelViewSet):
             ).annotate(amount=Sum('amount')
                        ).order_by('ingredient__name')
         )
+        return response
