@@ -52,11 +52,11 @@ class UserViewSet(UserViewSet):
         author = get_object_or_404(User, id=id)
         if request.method == 'POST':
             data = {'subscriber': request.user.id, 'author': author.id}
-            self.get_serializer(data=data).is_valid(raise_exception=True)
-            self.get_serializer(data=data).save()
+            serializer = self.get_serializer(data=data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
             return Response(
-                self.get_serializer(data=data).data,
-                status=status.HTTP_201_CREATED
+                serializer.data, status=status.HTTP_201_CREATED
             )
         if not Subscription.objects.filter(subscriber=request.user,
                                            author=author).exists():
@@ -136,17 +136,16 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def get_shopping_cart(self, request, pk):
         if request.method == 'POST':
             data = {'user': request.user.id, 'recipe': pk}
-            ShoppingCartSerializer(data=data).is_valid(raise_exception=True)
-            ShoppingCartSerializer(data=data).save()
+            serializer = ShoppingCartSerializer(data=data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
             return Response(
-                ShoppingCartSerializer(data=data).data,
-                status=status.HTTP_201_CREATED
+                serializer.data, status=status.HTTP_201_CREATED
             )
-        model = ShoppingCartSerializer.Meta.model
         if self.request.user.is_authenticated:
-            queryset = model.objects.filter(user=request.user,
-                                            recipe=get_object_or_404(
-                                                Recipe, pk=pk))
+            queryset = ShoppingCartSerializer.Meta.model.objects.filter(
+                user=request.user,
+                recipe=get_object_or_404(Recipe, pk=pk))
             if not queryset.exists():
                 return Response(status=status.HTTP_400_BAD_REQUEST)
             queryset.delete()
@@ -163,17 +162,16 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def get_favorite(self, request, pk):
         if request.method == 'POST':
             data = {'user': request.user.id, 'recipe': pk}
-            FavoriteSerializer(data=data).is_valid(raise_exception=True)
-            FavoriteSerializer(data=data).save()
+            serializer = FavoriteSerializer(data=data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
             return Response(
-                FavoriteSerializer(data=data).data,
-                status=status.HTTP_201_CREATED
+                serializer.data, status=status.HTTP_201_CREATED
             )
-        model = FavoriteSerializer.Meta.model
         if self.request.user.is_authenticated:
-            queryset = model.objects.filter(user=request.user,
-                                            recipe=get_object_or_404(
-                                                Recipe, pk=pk))
+            queryset = FavoriteSerializer.Meta.model.objects.filter(
+                user=request.user,
+                recipe=get_object_or_404(Recipe, pk=pk))
             if not queryset.exists():
                 return Response(status=status.HTTP_400_BAD_REQUEST)
             queryset.delete()
