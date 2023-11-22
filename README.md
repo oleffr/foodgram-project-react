@@ -33,4 +33,4 @@ gunicorn                      20.1.0
 ## Об Авторе
 Автор: Ольга Ефремова (github.com/oleffr)
 
-![example workflow](https://github.com/oleffr/kittygram_final/actions/workflows/main.yml/badge.svg)
+![example workflow](https://github.com/oleffr/foodgram-project-react/actions/workflows/main.yml/badge.svg)

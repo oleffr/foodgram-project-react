@@ -1,7 +1,4 @@
-import csv
-
 from django.db.models import Exists, OuterRef, Sum
-from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
@@ -22,6 +19,7 @@ from .serializers import (CreateRecipeSerializer, UserSerializer,
                           SubscriptionSerializer,
                           SubscriptionPresentSerializer,
                           TagSerializer)
+from .utils import download_csv
 
 
 class UserViewSet(UserViewSet):
@@ -75,9 +73,8 @@ class UserViewSet(UserViewSet):
     )
     def get_subscription_list(self, request):
         authors = User.objects.filter(author__subscriber=request.user)
-        serializer = self.get_serializer(self.paginate_queryset(
-            queryset=authors), many=True)
-        return self.get_paginated_response(serializer.data)
+        return self.get_paginated_response(self.get_serializer(
+            self.paginate_queryset(queryset=authors), many=True).data)
 
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
@@ -191,7 +188,17 @@ class RecipeViewSet(viewsets.ModelViewSet):
         url_name='download_shopping_cart',
     )
     def download_shopping_cart(self, request):
-        ingredients_cart = (
+        if not (
+            Recipe.ingredients.through.objects.filter(
+                recipe__shopping_cart__user=request.user
+            ).values(
+                'ingredient__name',
+                'ingredient__measurement_unit',
+            ).annotate(amount=Sum('amount')
+                       ).order_by('ingredient__name')
+        ).exists():
+            raise ValidationError('В списке покупок нет добавленных рецептов')
+        download_csv(
             Recipe.ingredients.through.objects.filter(
                 recipe__shopping_cart__user=request.user
             ).values(
@@ -200,14 +207,3 @@ class RecipeViewSet(viewsets.ModelViewSet):
             ).annotate(amount=Sum('amount')
                        ).order_by('ingredient__name')
         )
-        if not ingredients_cart.exists():
-            raise ValidationError('В списке покупок нет добавленных рецептов')
-        response = HttpResponse(
-            content_type="text/csv",
-            headers={'Content-Disposition':
-                     'attachment;filename="shopping_cart.csv"'},)
-        writer = csv.DictWriter(response,
-                                fieldnames=ingredients_cart.first().keys())
-        writer.writeheader()
-        writer.writerows(ingredients_cart)
-        return response

@@ -16,7 +16,7 @@ services:
     env_file: .env
     volumes:
       - ./data/:/app/data
-      - static:/backend_static
+      - static:/static/
       - media:/app/media/
   frontend:
     env_file: .env
