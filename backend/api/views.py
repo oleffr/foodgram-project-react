@@ -2,7 +2,8 @@ from django.db.models import Exists, OuterRef, Sum
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
-from recipes.models import (Favorite, Ingredient, Recipe,
+from recipes.models import (Favorite, Ingredient, Recipe, 
+                            RecipeIngredient,
                             ShoppingCart, Tag)
 from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
@@ -187,7 +188,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     )
     def download_shopping_cart(self, request):
         if not (
-            Recipe.ingredients.through.objects.filter(
+            RecipeIngredient.objects.through.objects.filter(
                 recipe__shopping_cart__user=request.user
             ).values(
                 'ingredient__name',
@@ -197,7 +198,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         ).exists():
             raise ValidationError('В списке покупок нет добавленных рецептов')
         download_csv(
-            Recipe.ingredients.through.objects.filter(
+            RecipeIngredient.objects.through.objects.filter(
                 recipe__shopping_cart__user=request.user
             ).values(
                 'ingredient__name',
