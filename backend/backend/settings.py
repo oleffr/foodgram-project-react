@@ -5,8 +5,6 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-FIELD_NUM_1 = 200
-FIELD_NUM_2 = 150
 AUTH_USER_MODEL = 'users.User'
 BASE_DIR = Path(__file__).resolve().parent.parent
 

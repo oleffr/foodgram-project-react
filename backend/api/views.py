@@ -2,18 +2,18 @@ from django.db.models import Exists, OuterRef, Sum
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
-from recipes.models import (Favorite, Ingredient, Recipe,
-                            RecipeIngredient,
-                            ShoppingCart, Tag)
 from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from users.models import User, Subscription
 
 from .filters import IngredientFilter, RecipeFilter
-from .permissions import AuthorOrAdminOrReadOnly
+from users.models import User, Subscription
+from .permissions import AuthorOrReadOnly
+from recipes.models import (Favorite, Ingredient, Recipe,
+                            RecipeIngredient,
+                            ShoppingCart, Tag)
 from .serializers import (CreateRecipeSerializer, UserSerializer,
                           FavoriteSerializer, IngredientSerializer,
                           RecipeSerializer, ShoppingCartSerializer,
@@ -52,8 +52,9 @@ class UserViewSet(UserViewSet):
     def to_subscribe(self, request, id):
         author = get_object_or_404(User, id=id)
         if request.method == 'POST':
-            data = {'subscriber': request.user.id, 'author': author.id}
-            serializer = self.get_serializer(data=data)
+            serializer = self.get_serializer(data={
+                'subscriber': request.user.id,
+                'author': author.id})
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(
@@ -98,7 +99,7 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
 class RecipeViewSet(viewsets.ModelViewSet):
     serializer_class = RecipeSerializer
     permission_classes = (
-        permissions.IsAuthenticatedOrReadOnly, AuthorOrAdminOrReadOnly
+        permissions.IsAuthenticatedOrReadOnly, AuthorOrReadOnly
     )
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
@@ -136,8 +137,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
     )
     def get_shopping_cart(self, request, pk):
         if request.method == 'POST':
-            data = {'user': request.user.id, 'recipe': pk}
-            serializer = ShoppingCartSerializer(data=data)
+            serializer = ShoppingCartSerializer(data={'user': request.user.id,
+                                                      'recipe': pk})
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(
@@ -162,8 +163,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
     )
     def get_favorite(self, request, pk):
         if request.method == 'POST':
-            data = {'user': request.user.id, 'recipe': pk}
-            serializer = FavoriteSerializer(data=data)
+            serializer = FavoriteSerializer(data={'user': request.user.id,
+                                                  'recipe': pk})
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(
