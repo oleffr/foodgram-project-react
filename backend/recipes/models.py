@@ -138,7 +138,7 @@ class ShoppingCartFavorite(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(fields=['user', 'recipe'],
-                                    name='unique_recipe_ShoppingCartFavorite'),
+                                    name='unique_recipe_%(class)'),
         ]
         abstract = True
 
