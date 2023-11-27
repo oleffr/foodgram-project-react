@@ -1,5 +1,6 @@
 from django.db import transaction
-from djoser.serializers import UserCreateSerializer, UserSerializer
+from djoser.serializers import (UserCreateSerializer, 
+                                UserSerializer as d_UserSerializer)
 from drf_extra_fields.fields import Base64ImageField
 from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
                             ShoppingCart, Tag)
@@ -9,10 +10,10 @@ from rest_framework.validators import UniqueTogetherValidator
 from users.models import User, Subscription
 
 
-class UserSerializer(UserSerializer):
+class UserSerializer(d_UserSerializer):
     is_subscribed = serializers.BooleanField(default=False)
 
-    class Meta(UserSerializer.Meta):
+    class Meta(d_UserSerializer.Meta):
         model = User
         fields = ('email',
                   'id',
