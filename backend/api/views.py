@@ -1,7 +1,7 @@
 from django.db.models import Exists, OuterRef, Sum
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from djoser.views import UserViewSet as d_UserViewSet
+from djoser.views import UserViewSet
 from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
@@ -22,7 +22,7 @@ from .serializers import (CreateRecipeSerializer, UserSerializer,
 from .utils import download_csv
 
 
-class UserViewSet(d_UserViewSet):
+class UserViewSet(UserViewSet):
     serializer_class = UserSerializer
 
     def get_queryset(self):
