@@ -22,6 +22,14 @@ class Ingredient(models.Model):
     class Meta:
         verbose_name = 'Ингредиент'
         verbose_name_plural = 'Ингредиенты'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['name', 'measurement_unit'],
+                name='unique_ingredient_and_unit',
+                violation_error_message=('У ингредиента может быть только одна'
+                                         'единица измерения')
+            ),
+        ]
 
 
 class Tag(models.Model):
@@ -113,7 +121,7 @@ class RecipeIngredient(models.Model):
         )
 
 
-class ShoppingCart(models.Model):
+class ShoppingCartFavorite(models.Model):
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
@@ -128,37 +136,21 @@ class ShoppingCart(models.Model):
     )
 
     class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['user', 'recipe'],
+                                    name='unique_recipe_ShoppingCartFavorite'),
+        ]
+        abstract = True
+
+
+class ShoppingCart(ShoppingCartFavorite):
+    class Meta(ShoppingCartFavorite.Meta):
         verbose_name = 'Список покупок'
         verbose_name_plural = 'Список покупок'
         ordering = ('user', 'recipe')
-        constraints = (
-            models.UniqueConstraint(
-                fields=['user', 'recipe'],
-                name='unique_shopping_cart'
-            ),
-        )
 
 
-class Favorite(models.Model):
-    recipe = models.ForeignKey(
-        Recipe,
-        on_delete=models.CASCADE,
-        related_name='favoriting',
-        verbose_name='Рецепт'
-    )
-    user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='favoriting',
-        verbose_name='Пользователь'
-    )
-
-    class Meta:
+class Favorite(ShoppingCartFavorite):
+    class Meta(ShoppingCartFavorite):
         verbose_name = 'Избранное'
         ordering = ('user', 'recipe',)
-        constraints = (
-            models.UniqueConstraint(
-                fields=['user', 'recipe'],
-                name='unique_favorite_recipe'
-            ),
-        )
