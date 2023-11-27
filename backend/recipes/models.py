@@ -26,8 +26,6 @@ class Ingredient(models.Model):
             models.UniqueConstraint(
                 fields=['name', 'measurement_unit'],
                 name='unique_ingredient_and_unit',
-                violation_error_message=('У ингредиента может быть только одна'
-                                         'единица измерения')
             ),
         ]
 
