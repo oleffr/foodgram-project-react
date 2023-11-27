@@ -248,7 +248,7 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
         if len(array_of_ingredients) != len(set(array_of_ingredients)):
             raise serializers.ValidationError(
                 'Ингредиенты не могут повторяться')
-        if array_of_ingredients:
+        if not array_of_ingredients:
             raise serializers.ValidationError(
                 'У рецепта должен быть хотя бы один ингридиент')
         return ingredients
@@ -281,7 +281,7 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
         if len(tags) != len(set(tags)):
             raise serializers.ValidationError(
                 'Теги не могут повторяться')
-        if tags:
+        if not tags:
             raise serializers.ValidationError(
                 'У рецепта должен быть хотя бы один тэг')
         return tags
