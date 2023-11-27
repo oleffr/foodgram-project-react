@@ -150,5 +150,5 @@ class ShoppingCart(ShoppingCartFavorite):
 
 
 class Favorite(ShoppingCartFavorite):
-    class Meta(ShoppingCartFavorite):
+    class Meta(ShoppingCartFavorite.Meta):
         verbose_name = 'Избранное'
