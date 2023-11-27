@@ -125,20 +125,18 @@ class ShoppingCartFavorite(models.Model):
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        related_name='shopping_cart',
         verbose_name='Рецепт'
     )
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='shopping_cart',
         verbose_name='Пользователь'
     )
 
     class Meta:
         constraints = [
             models.UniqueConstraint(fields=['user', 'recipe'],
-                                    name='unique_recipe_%(class)'),
+                                    name='unique_recipe_%(class)s'),
         ]
         abstract = True
 
