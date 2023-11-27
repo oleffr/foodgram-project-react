@@ -1,19 +1,17 @@
 from django.db import transaction
-from djoser.serializers import (UserCreateSerializer,
-                                UserSerializer as d_UserSerializer)
+from djoser.serializers import UserCreateSerializer, UserSerializer
 from drf_extra_fields.fields import Base64ImageField
 from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
                             ShoppingCart, Tag)
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
-
 from users.models import User, Subscription
 
 
-class UserSerializer(d_UserSerializer):
+class UserSerializer(UserSerializer):
     is_subscribed = serializers.BooleanField(default=False)
 
-    class Meta(d_UserSerializer.Meta):
+    class Meta(UserSerializer.Meta):
         model = User
         fields = ('email',
                   'id',
@@ -160,17 +158,10 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
 
 class CreateRecipeIngredientSerializer(serializers.ModelSerializer):
     id = serializers.PrimaryKeyRelatedField(queryset=Ingredient.objects.all())
-    amount = serializers.PositiveSmallIntegerField(blank=False)
 
     class Meta:
         model = RecipeIngredient
         fields = ('id', 'amount')
-
-    def validate_amount(self, amount):
-        if not amount:
-            raise serializers.ValidationError(
-                'Количество ингридиента не может быть равно 0')
-        return amount
 
 
 class RecipePresentSerializer(serializers.ModelSerializer):
@@ -210,7 +201,6 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
     author = UserSerializer(read_only=True)
     tags = serializers.PrimaryKeyRelatedField(many=True,
                                               queryset=Tag.objects.all())
-    cooking_time = serializers.PositiveSmallIntegerField(blank=False)
 
     class Meta:
         model = Recipe
@@ -222,12 +212,6 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
                   'text',
                   'cooking_time',
                   'author')
-
-    def validate_tags(self, cooking_time):
-        if not cooking_time:
-            raise serializers.ValidationError(
-                'Длительность приготовления должна быть положительным числом')
-        return cooking_time
 
     def make_ingredients_list(self, array_of_ingredients, recipe):
         recipe.ingredients.clear()
@@ -249,7 +233,7 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
         if len(array_of_ingredients) != len(set(array_of_ingredients)):
             raise serializers.ValidationError(
                 'Ингредиенты не могут повторяться')
-        if not array_of_ingredients:
+        if len(array_of_ingredients) == 0:
             raise serializers.ValidationError(
                 'У рецепта должен быть хотя бы один ингридиент')
         return ingredients
@@ -282,7 +266,7 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
         if len(tags) != len(set(tags)):
             raise serializers.ValidationError(
                 'Теги не могут повторяться')
-        if not tags:
+        if len(tags) == 0:
             raise serializers.ValidationError(
                 'У рецепта должен быть хотя бы один тэг')
         return tags
