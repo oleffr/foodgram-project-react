@@ -147,10 +147,8 @@ class ShoppingCart(ShoppingCartFavorite):
     class Meta(ShoppingCartFavorite.Meta):
         verbose_name = 'Список покупок'
         verbose_name_plural = 'Список покупок'
-        ordering = ('user', 'recipe')
 
 
 class Favorite(ShoppingCartFavorite):
     class Meta(ShoppingCartFavorite):
         verbose_name = 'Избранное'
-        ordering = ('user', 'recipe',)
