@@ -218,19 +218,19 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
         recipe.ingredients.clear()
         ingredients_list = []
         for ingredient_data in array_of_ingredients:
-            amount = ingredient_data['amount']
-            cooking_time = recipe['cooking_time']
-            if not amount:
-                raise serializers.ValidationError(
-                    'Неверное количество ингредиента')
-            if not cooking_time:
-                raise serializers.ValidationError(
-                    'Неверное время приготовления рецепта')
+            # amount = ingredient_data['amount']
+            # cooking_time = recipe['cooking_time']
+            # if not amount:
+            #     raise serializers.ValidationError(
+            #         'Неверное количество ингредиента')
+            # if not cooking_time:
+            #     raise serializers.ValidationError(
+            #         'Неверное время приготовления рецепта')
             ingredients_list.append(
                 recipe.ingredients.through(
                     recipe=recipe,
                     ingredient=ingredient_data['id'],
-                    amount=amount
+                    amount=ingredient_data['amount']
                 )
             )
         recipe.ingredients.through.objects.bulk_create(ingredients_list)

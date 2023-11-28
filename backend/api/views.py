@@ -141,14 +141,13 @@ class RecipeViewSet(viewsets.ModelViewSet):
         url_name='shopping_cart',
     )
     def get_shopping_cart(self, request, pk):
-        if request.method == 'POST':
-            data = {'user': request.user.id, 'recipe': pk}
-            serializer = ShoppingCartSerializer(data=data)
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return Response(
-                serializer.data, status=status.HTTP_201_CREATED
-            )
+        data = {'user': request.user.id, 'recipe': pk}
+        serializer = ShoppingCartSerializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(
+            serializer.data, status=status.HTTP_201_CREATED
+        )
 
     @get_shopping_cart.mapping.delete
     def delete_shopping_cart(self, request, pk):
@@ -167,14 +166,13 @@ class RecipeViewSet(viewsets.ModelViewSet):
         url_name='favorite',
     )
     def get_favorite(self, request, pk):
-        if request.method == 'POST':
-            data = {'user': request.user.id, 'recipe': pk}
-            serializer = FavoriteSerializer(data=data)
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return Response(
-                serializer.data, status=status.HTTP_201_CREATED
-            )
+        data = {'user': request.user.id, 'recipe': pk}
+        serializer = FavoriteSerializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(
+            serializer.data, status=status.HTTP_201_CREATED
+        )
 
     @get_favorite.mapping.delete
     def delete_favorite(self, request, pk):
