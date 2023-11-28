@@ -219,13 +219,9 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
         ingredients_list = []
         for ingredient_data in array_of_ingredients:
             amount = ingredient_data['amount']
-            cooking_time = recipe.get('cooking_time')
             if not amount:
                 raise serializers.ValidationError(
                     'Неверное количество ингредиента')
-            if not cooking_time:
-                raise serializers.ValidationError(
-                    'Неверное время приготовления рецепта')
             ingredients_list.append(
                 recipe.ingredients.through(
                     recipe=recipe,
