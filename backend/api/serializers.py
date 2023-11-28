@@ -1,10 +1,11 @@
 from django.db import transaction
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from drf_extra_fields.fields import Base64ImageField
-from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
-                            ShoppingCart, Tag)
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
+
+from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
+                            ShoppingCart, Tag)
 from users.models import User, Subscription
 
 
@@ -233,7 +234,7 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
         if len(array_of_ingredients) != len(set(array_of_ingredients)):
             raise serializers.ValidationError(
                 'Ингредиенты не могут повторяться')
-        if len(array_of_ingredients) == 0:
+        if not array_of_ingredients:
             raise serializers.ValidationError(
                 'У рецепта должен быть хотя бы один ингридиент')
         return ingredients
@@ -266,7 +267,7 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
         if len(tags) != len(set(tags)):
             raise serializers.ValidationError(
                 'Теги не могут повторяться')
-        if len(tags) == 0:
+        if not tags:
             raise serializers.ValidationError(
                 'У рецепта должен быть хотя бы один тэг')
         return tags
