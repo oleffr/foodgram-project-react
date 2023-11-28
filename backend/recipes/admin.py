@@ -16,7 +16,7 @@ class RecipeAdmin(admin.ModelAdmin):
 
     def counter_in_favorite(self, object):
         return object.favorite_set.count()
-    counter_in_favorite.short_description = 'Сколько раз добавили в избранное'
+    counter_in_favorite.short_description = 'Количество добавлений в избранное'
 
 
 @admin.register(Ingredient)
