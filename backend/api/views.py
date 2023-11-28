@@ -2,9 +2,7 @@ from django.db.models import Exists, OuterRef, Sum
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
-from recipes.models import (Favorite, Ingredient, Recipe,
-                            RecipeIngredient,
-                            ShoppingCart, Tag)
+
 from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
@@ -12,15 +10,19 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from users.models import User, Subscription
 
-from .filters import IngredientFilter, RecipeFilter
-from .permissions import AuthorOrReadOnly
-from .serializers import (CreateRecipeSerializer, UserSerializer,
-                          FavoriteSerializer, IngredientSerializer,
-                          RecipeSerializer, ShoppingCartSerializer,
-                          SubscriptionSerializer,
-                          SubscriptionPresentSerializer,
-                          TagSerializer)
-from .utils import download_csv
+from api.filters import IngredientFilter, RecipeFilter
+from api.permissions import AuthorOrReadOnly
+from api.serializers import (CreateRecipeSerializer, UserSerializer,
+                             FavoriteSerializer, IngredientSerializer,
+                             RecipeSerializer, ShoppingCartSerializer,
+                             SubscriptionSerializer,
+                             SubscriptionPresentSerializer,
+                             TagSerializer)
+from api.utils import download_csv
+from recipes.models import (Favorite, Ingredient, Recipe,
+                            RecipeIngredient,
+                            ShoppingCart, Tag)
+from users.models import User, Subscription
 
 
 class UserViewSet(UserViewSet):
@@ -150,7 +152,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             if not queryset.exists():
                 return Response(status=status.HTTP_400_BAD_REQUEST)
             queryset.delete()
-        else:
+        elif self.request.user.is_authenticated:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -176,7 +178,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             if not queryset.exists():
                 return Response(status=status.HTTP_400_BAD_REQUEST)
             queryset.delete()
-        else:
+        elif not self.request.user.is_authenticated:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
