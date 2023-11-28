@@ -34,7 +34,7 @@ class RecipeFilter(d_filters.FilterSet):
     def get_is_favorited(self, queryset, id, value):
         user = get_object_or_404(User, id=id)
         if value:
-            return queryset.filter(favoriting__user=user)
+            return queryset.filter(favorite__user=user)
         return queryset
 
 

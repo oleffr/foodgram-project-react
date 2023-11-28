@@ -230,7 +230,7 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
                 recipe.ingredients.through(
                     recipe=recipe,
                     ingredient=ingredient_data['id'],
-                    amount=ingredient_data['amount']
+                    amount=amount
                 )
             )
         recipe.ingredients.through.objects.bulk_create(ingredients_list)
