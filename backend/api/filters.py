@@ -1,8 +1,5 @@
 from django_filters import rest_framework as d_filters
-from django.shortcuts import get_object_or_404
-
 from recipes.models import Ingredient, Recipe, Tag
-from users.models import User
 
 
 class RecipeFilter(d_filters.FilterSet):
@@ -25,16 +22,14 @@ class RecipeFilter(d_filters.FilterSet):
                   'is_favorited',
                   'in_cart')
 
-    def get_in_cart(self, queryset, id, value):
-        user = get_object_or_404(User, id=id)
-        if value:
-            return queryset.filter(shopping_cart__user=user)
+    def get_in_cart(self, queryset, name, value):
+        if value and self.request.user.is_authenticated:
+            return queryset.filter(shopping_cart__user=self.request.user)
         return queryset
 
-    def get_is_favorited(self, queryset, id, value):
-        user = get_object_or_404(User, id=id)
-        if value:
-            return queryset.filter(favorite__user=user)
+    def get_is_favorited(self, queryset, name, value):
+        if value and self.request.user.is_authenticated:
+            return queryset.filter(favorite__user=self.request.user)
         return queryset
 
 
