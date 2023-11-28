@@ -175,16 +175,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
             return Response(
                 serializer.data, status=status.HTTP_201_CREATED
             )
-        if self.request.user.is_authenticated:
-            queryset = FavoriteSerializer.Meta.model.objects.filter(
-                user=request.user,
-                recipe=get_object_or_404(Recipe, pk=pk))
-            if not queryset.exists():
-                return Response(status=status.HTTP_400_BAD_REQUEST)
-            queryset.delete()
-        elif not self.request.user.is_authenticated:
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
-        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @get_favorite.mapping.delete
     def delete_favorite(self, request, pk):
