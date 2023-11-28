@@ -54,8 +54,7 @@ class UserViewSet(UserViewSet):
     def to_subscribe(self, request, id):
         author = get_object_or_404(User, id=id)
         if request.method == 'POST':
-            data = {'subscriber': request.user.id, 'author': author.id}
-            serializer = self.get_serializer(data=data)
+            serializer = self.get_serializer(data={'subscriber': request.user.id, 'author': author.id})
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(
@@ -141,8 +140,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         url_name='shopping_cart',
     )
     def get_shopping_cart(self, request, pk):
-        data = {'user': request.user.id, 'recipe': pk}
-        serializer = ShoppingCartSerializer(data=data)
+        serializer = ShoppingCartSerializer(data={'user': request.user.id, 'recipe': pk})
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(
@@ -166,8 +164,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         url_name='favorite',
     )
     def get_favorite(self, request, pk):
-        data = {'user': request.user.id, 'recipe': pk}
-        serializer = FavoriteSerializer(data=data)
+        serializer = FavoriteSerializer(data={'user': request.user.id, 'recipe': pk})
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(
