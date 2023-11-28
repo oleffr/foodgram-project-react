@@ -11,7 +11,8 @@ from rest_framework.response import Response
 from .filters import IngredientFilter, RecipeFilter
 from users.models import User, Subscription
 from .permissions import AuthorOrReadOnly
-from recipes.models import (Ingredient, Recipe,
+from recipes.models import (Favorite, Ingredient, ShoppingCart,
+                            Recipe,
                             RecipeIngredient, Tag)
 from .serializers import (CreateRecipeSerializer, UserSerializer,
                           FavoriteSerializer, IngredientSerializer,
@@ -112,6 +113,14 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return (Recipe.objects.all().select_related('author')
+                .annotate(is_favorited=Exists(
+                    Favorite.objects.filter(recipe=OuterRef('pk'))
+                    .select_related('user')))
+                .annotate(is_in_shopping_cart=Exists(ShoppingCart.objects
+                                                     .filter(
+                                                         recipe=OuterRef(
+                                                             'pk'))
+                                                     .select_related('user')))
                 .prefetch_related('tags', 'ingredients'))
 
     def get_serializer_class(self):
@@ -158,8 +167,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
     @action(
         detail=True,
         methods=['post'],
-        url_path='favorites',
-        url_name='favorites',
+        url_path='favorite',
+        url_name='favorite',
     )
     def get_favorite(self, request, pk):
         if request.method == 'POST':
