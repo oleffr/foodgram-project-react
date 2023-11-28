@@ -158,8 +158,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
     @action(
         detail=True,
         methods=['post'],
-        url_path='favorite',
-        url_name='favorite',
+        url_path='favorites',
+        url_name='favorites',
     )
     def get_favorite(self, request, pk):
         if request.method == 'POST':
