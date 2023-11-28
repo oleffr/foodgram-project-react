@@ -8,7 +8,6 @@ from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from users.models import User, Subscription
 
 from api.filters import IngredientFilter, RecipeFilter
 from api.permissions import AuthorOrReadOnly
