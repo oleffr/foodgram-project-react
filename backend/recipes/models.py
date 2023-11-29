@@ -1,14 +1,10 @@
 from colorfield.fields import ColorField
-from django.core.validators import (MinValueValidator,
-                                    MaxValueValidator)
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
-from backend.constants import (MAX_AMOUNT_CONST,
-                               MAX_COOKING_TIME_CONST,
-                               MIN_AMOUNT_CONST,
-                               MIN_COOKING_TIME_CONST,
-                               MEASUREMENT_UNIT_CONST,
-                               NAME_FIELD_CONST,
+from backend.constants import (MAX_AMOUNT_CONST, MAX_COOKING_TIME_CONST,
+                               MEASUREMENT_UNIT_CONST, MIN_AMOUNT_CONST,
+                               MIN_COOKING_TIME_CONST, NAME_FIELD_CONST,
                                SLUG_FIELD_CONST)
 from users.models import User
 

@@ -4,9 +4,11 @@ from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
+from backend.constants import (MAX_AMOUNT_CONST, MAX_COOKING_TIME_CONST,
+                               MIN_AMOUNT_CONST, MIN_COOKING_TIME_CONST)
 from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
                             ShoppingCart, Tag)
-from users.models import User, Subscription
+from users.models import Subscription, User
 
 
 class UserSerializer(UserSerializer):
@@ -167,9 +169,11 @@ class CreateRecipeIngredientSerializer(serializers.ModelSerializer):
         fields = ('id', 'amount')
 
     def validate_amount(self, amount):
-        if not amount:
+        if not (MIN_AMOUNT_CONST <= amount <= MAX_AMOUNT_CONST):
             raise serializers.ValidationError(
-                'Значение количества ингредиента должно быть больше 0')
+                'Значение количества ингредиента должно'
+                f'лежать в диапазоне от {MIN_AMOUNT_CONST}'
+                f'до {MAX_AMOUNT_CONST}')
         return amount
 
 
@@ -225,9 +229,12 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
                   'author')
 
     def validate_cooking_time(self, cooking_time):
-        if not cooking_time:
+        if not (MIN_COOKING_TIME_CONST <= cooking_time
+                <= MAX_COOKING_TIME_CONST):
             raise serializers.ValidationError(
-                'Значение длительности приготовления должно быть больше 0')
+                'Значение времени приготовления должно'
+                f'лежать в диапазоне от {MIN_COOKING_TIME_CONST}'
+                f'до {MAX_COOKING_TIME_CONST}')
         return cooking_time
 
     def make_ingredients_list(self, array_of_ingredients, recipe):

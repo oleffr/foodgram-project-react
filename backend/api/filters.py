@@ -1,6 +1,5 @@
-from django_filters import rest_framework as d_filters
 from django.shortcuts import get_object_or_404
-
+from django_filters import rest_framework as d_filters
 from recipes.models import Ingredient, Recipe, Tag
 from users.models import User
 

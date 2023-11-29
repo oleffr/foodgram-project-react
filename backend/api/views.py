@@ -2,7 +2,6 @@ from django.db.models import Exists, OuterRef, Sum
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
-
 from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
@@ -11,16 +10,15 @@ from rest_framework.response import Response
 
 from api.filters import IngredientFilter, RecipeFilter
 from api.permissions import AuthorOrReadOnly
-from api.serializers import (CreateRecipeSerializer, UserSerializer,
-                             FavoriteSerializer, IngredientSerializer,
-                             RecipeSerializer, ShoppingCartSerializer,
-                             SubscriptionSerializer,
+from api.serializers import (CreateRecipeSerializer, FavoriteSerializer,
+                             IngredientSerializer, RecipeSerializer,
+                             ShoppingCartSerializer,
                              SubscriptionPresentSerializer,
-                             TagSerializer)
+                             SubscriptionSerializer, TagSerializer,
+                             UserSerializer)
 from api.utils import download_csv
-from recipes.models import (Ingredient, Recipe,
-                            RecipeIngredient, Tag)
-from users.models import User, Subscription
+from recipes.models import Ingredient, Recipe, RecipeIngredient, Tag
+from users.models import Subscription, User
 
 
 class UserViewSet(UserViewSet):
