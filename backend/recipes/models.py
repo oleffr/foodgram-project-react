@@ -1,20 +1,25 @@
 from colorfield.fields import ColorField
-from django.core.validators import MinValueValidator
+from django.core.validators import (MinValueValidator,
+                                    MaxValueValidator)
 from django.db import models
 
-from api.constants import ONE_CONSTANT, USERNAME_FIELD
+from backend.backend.constants import (MAX_AMOUNT_CONST,
+                                       MAX_COOKING_TIME_CONST,
+                                       MIN_AMOUNT_CONST,
+                                       MIN_COOKING_TIME_CONST,
+                                       USERNAME_FIELD_CONST,)
 from users.models import User
 
 
 class Ingredient(models.Model):
     name = models.CharField(
-        max_length=USERNAME_FIELD,
+        max_length=USERNAME_FIELD_CONST,
         verbose_name='Hазвание ингредиента',
         db_index=True,
         blank=False
     )
     measurement_unit = models.CharField(
-        max_length=USERNAME_FIELD,
+        max_length=USERNAME_FIELD_CONST,
         verbose_name='Единица измерения ингредиента',
         blank=False
     )
@@ -31,13 +36,13 @@ class Ingredient(models.Model):
 
 
 class Tag(models.Model):
-    name = models.CharField(max_length=USERNAME_FIELD,
+    name = models.CharField(max_length=USERNAME_FIELD_CONST,
                             verbose_name='Hазвание тега',
                             unique=True, db_index=True)
     color = ColorField(default='#FF0000', max_length=7,
                        verbose_name='цвет', unique=True)
     slug = models.SlugField(
-        max_length=USERNAME_FIELD,
+        max_length=USERNAME_FIELD_CONST,
         verbose_name='slug',
         unique=True,
     )
@@ -67,7 +72,7 @@ class Recipe(models.Model):
         blank=False
     )
     name = models.CharField(
-        max_length=USERNAME_FIELD,
+        max_length=USERNAME_FIELD_CONST,
         verbose_name='Hазвание',
         db_index=True,
         blank=False
@@ -75,7 +80,9 @@ class Recipe(models.Model):
     text = models.TextField(verbose_name='описание')
     cooking_time = models.PositiveSmallIntegerField(
         verbose_name='Время приготовления (в минутах)',
-        validators=[MinValueValidator(ONE_CONSTANT)],)
+        validators=[MinValueValidator(MIN_COOKING_TIME_CONST),
+                    MaxValueValidator(MAX_COOKING_TIME_CONST)
+                    ],)
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -107,7 +114,9 @@ class RecipeIngredient(models.Model):
     )
     amount = models.PositiveSmallIntegerField(
         verbose_name='Количество ингредиента',
-        validators=[MinValueValidator(ONE_CONSTANT)],)
+        validators=[MinValueValidator(MIN_AMOUNT_CONST),
+                    MaxValueValidator(MAX_AMOUNT_CONST)
+                    ],)
 
     class Meta:
         verbose_name = 'Ингредиент в рецепте'
