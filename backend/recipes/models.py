@@ -3,11 +3,11 @@ from django.core.validators import (MinValueValidator,
                                     MaxValueValidator)
 from django.db import models
 
-from backend.backend.constants import (MAX_AMOUNT_CONST,
-                                       MAX_COOKING_TIME_CONST,
-                                       MIN_AMOUNT_CONST,
-                                       MIN_COOKING_TIME_CONST,
-                                       USERNAME_FIELD_CONST,)
+from backend.constants import (MAX_AMOUNT_CONST,
+                               MAX_COOKING_TIME_CONST,
+                               MIN_AMOUNT_CONST,
+                               MIN_COOKING_TIME_CONST,
+                               USERNAME_FIELD_CONST,)
 from users.models import User
 
 

@@ -1,7 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
-from backend.backend.constants import USERNAME_FIELD_CONST, FIELDS_CONST
+from backend.constants import USERNAME_FIELD_CONST, FIELDS_CONST
 
 
 class User(AbstractUser):

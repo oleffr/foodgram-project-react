@@ -159,10 +159,18 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
 
 class CreateRecipeIngredientSerializer(serializers.ModelSerializer):
     id = serializers.PrimaryKeyRelatedField(queryset=Ingredient.objects.all())
+    amount = serializers.ReadOnlyField(
+        source='recipeingredient.amount')
 
     class Meta:
         model = RecipeIngredient
         fields = ('id', 'amount')
+
+    def validate_amount(self, amount):
+        if not amount:
+            raise serializers.ValidationError(
+                'Значение количества ингредиента должно быть больше 0')
+        return amount
 
 
 class RecipePresentSerializer(serializers.ModelSerializer):
@@ -202,6 +210,8 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
     author = UserSerializer(read_only=True)
     tags = serializers.PrimaryKeyRelatedField(many=True,
                                               queryset=Tag.objects.all())
+    cooking_time = serializers.ReadOnlyField(
+        source='recipe.amount')
 
     class Meta:
         model = Recipe
@@ -214,14 +224,16 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
                   'cooking_time',
                   'author')
 
+    def validate_cooking_time(self, cooking_time):
+        if not cooking_time:
+            raise serializers.ValidationError(
+                'Значение длительности приготовления должно быть больше 0')
+        return cooking_time
+
     def make_ingredients_list(self, array_of_ingredients, recipe):
         recipe.ingredients.clear()
         ingredients_list = []
         for ingredient_data in array_of_ingredients:
-            amount = ingredient_data['amount']
-            if not amount:
-                raise serializers.ValidationError(
-                    'Неверное количество ингредиента')
             ingredients_list.append(
                 recipe.ingredients.through(
                     recipe=recipe,
