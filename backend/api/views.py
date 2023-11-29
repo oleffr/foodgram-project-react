@@ -18,9 +18,8 @@ from api.serializers import (CreateRecipeSerializer, UserSerializer,
                              SubscriptionPresentSerializer,
                              TagSerializer)
 from api.utils import download_csv
-from recipes.models import (Favorite, Ingredient, Recipe,
-                            RecipeIngredient,
-                            ShoppingCart, Tag)
+from recipes.models import (Ingredient, Recipe,
+                            RecipeIngredient, Tag)
 from users.models import User, Subscription
 
 
@@ -65,9 +64,6 @@ class UserViewSet(UserViewSet):
     @to_subscribe.mapping.delete
     def delete_subscription(self, request, id):
         author = get_object_or_404(User, id=id)
-        if not Subscription.objects.filter(subscriber=request.user,
-                                           author=author).exists():
-            raise ValidationError('Такой подписки нет')
         Subscription.objects.filter(subscriber=request.user,
                                     author=author).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -110,22 +106,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
     filterset_class = RecipeFilter
 
     def get_queryset(self):
-        user = self.request.user
-        if user.is_authenticated:
-            return (Recipe.objects.all().select_related('author')
-                    .annotate(is_favorited=Exists(
-                        Favorite.objects.filter(recipe=OuterRef('pk'))
-                        .select_related('user')
-                    ))
-                    .annotate(is_in_shopping_cart=Exists(ShoppingCart.objects
-                                                         .filter(
-                                                             recipe=OuterRef(
-                                                                 'pk'))
-                                                         .select_related(
-                                                             'user')
-                                                         ))
-                    .prefetch_related('tags', 'ingredients')
-                    )
         return (Recipe.objects.all().select_related('author')
                 .prefetch_related('tags', 'ingredients'))
 
@@ -157,7 +137,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
         count, _ = queryset.delete()
         if count:
             return Response(status=status.HTTP_204_NO_CONTENT)
-        raise ValidationError('Такого рецепта нет в корзине')
 
     @action(
         detail=True,
@@ -182,7 +161,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
         count, _ = queryset.delete()
         if count:
             return Response(status=status.HTTP_204_NO_CONTENT)
-        raise ValidationError('Этот рецепт не оформлен в избранном')
 
     @action(
         detail=False,
