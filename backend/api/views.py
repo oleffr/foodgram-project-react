@@ -62,8 +62,10 @@ class UserViewSet(UserViewSet):
     @to_subscribe.mapping.delete
     def delete_subscription(self, request, id):
         author = get_object_or_404(User, id=id)
-        Subscription.objects.filter(subscriber=request.user,
-                                    author=author).delete()
+        subscription = get_object_or_404(Subscription.objects.filter(
+                                         subscriber=request.user,
+                                         author=author))
+        subscription.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
