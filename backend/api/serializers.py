@@ -215,8 +215,8 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
     author = UserSerializer(read_only=True)
     tags = serializers.PrimaryKeyRelatedField(many=True,
                                               queryset=Tag.objects.all())
-    cooking_time = serializers.ReadOnlyField(
-        source='recipe.amount')
+    #cooking_time = serializers.ReadOnlyField(
+    #    source='recipe.amount')
 
     class Meta:
         model = Recipe
