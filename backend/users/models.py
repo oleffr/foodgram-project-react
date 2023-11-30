@@ -1,13 +1,13 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
-from backend.constants import EMAIL_FIELD_CONST, USER_NAME_FIELD_CONST
+from backend.constants import USER_EMAIL_LEN, USER_NAME_FIELD_CONST
 
 
 class User(AbstractUser):
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username', 'first_name', 'last_name', 'password']
-    email = models.EmailField(max_length=EMAIL_FIELD_CONST, blank=False,
+    email = models.EmailField(max_length=USER_EMAIL_LEN, blank=False,
                               verbose_name='email',
                               unique=True)
     first_name = models.CharField(max_length=USER_NAME_FIELD_CONST,

@@ -4,14 +4,14 @@ from django.db import models
 
 from backend.constants import (MAX_AMOUNT_CONST, MAX_COOKING_TIME_CONST,
                                MEASUREMENT_UNIT_CONST, MIN_AMOUNT_CONST,
-                               MIN_COOKING_TIME_CONST, NAME_FIELD_CONST,
-                               SLUG_FIELD_CONST)
+                               MIN_COOKING_TIME_CONST, INGREDIENT_NAME_LEN,
+                               TAG_SLUG_LEN)
 from users.models import User
 
 
 class Ingredient(models.Model):
     name = models.CharField(
-        max_length=NAME_FIELD_CONST,
+        max_length=INGREDIENT_NAME_LEN,
         verbose_name='Hазвание ингредиента',
         db_index=True,
         blank=False
@@ -34,13 +34,13 @@ class Ingredient(models.Model):
 
 
 class Tag(models.Model):
-    name = models.CharField(max_length=NAME_FIELD_CONST,
+    name = models.CharField(max_length=INGREDIENT_NAME_LEN,
                             verbose_name='Hазвание тега',
                             unique=True, db_index=True)
     color = ColorField(default='#FF0000', max_length=7,
                        verbose_name='цвет', unique=True)
     slug = models.SlugField(
-        max_length=SLUG_FIELD_CONST,
+        max_length=TAG_SLUG_LEN,
         verbose_name='slug',
         unique=True,
     )
@@ -70,7 +70,7 @@ class Recipe(models.Model):
         blank=False
     )
     name = models.CharField(
-        max_length=NAME_FIELD_CONST,
+        max_length=INGREDIENT_NAME_LEN,
         verbose_name='Hазвание',
         db_index=True,
         blank=False
