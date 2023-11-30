@@ -4,8 +4,8 @@ from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
-from backend.constants import (MAX_AMOUNT_CONST, MAX_COOKING_TIME_CONST,
-                               MIN_AMOUNT_CONST, MIN_COOKING_TIME_CONST)
+from backend.constants import (MAX_COOKING_TIME_CONST,
+                               MIN_COOKING_TIME_CONST)
 from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
                             ShoppingCart, Tag)
 from users.models import Subscription, User
@@ -160,7 +160,7 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
 
 
 class CreateRecipeIngredientSerializer(serializers.ModelSerializer):
-    # id = serializers.PrimaryKeyRelatedField(queryset=Ingredient.objects.all())
+    id = serializers.PrimaryKeyRelatedField(queryset=Ingredient.objects.all())
     # amount = serializers.ReadOnlyField(
     #     source='recipeingredient.amount')
 
