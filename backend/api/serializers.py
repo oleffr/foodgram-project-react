@@ -228,7 +228,7 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
                   'cooking_time',
                   'author')
 
-    def validate_cooking_time(self, data):
+    def validate(self, data):
         if not (MIN_COOKING_TIME_CONST <= data['cooking_time']
                 <= MAX_COOKING_TIME_CONST):
             raise serializers.ValidationError(
