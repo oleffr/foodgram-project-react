@@ -17,9 +17,11 @@ from api.serializers import (CreateRecipeSerializer, FavoriteSerializer,
                              SubscriptionSerializer, TagSerializer,
                              UserSerializer)
 from api.utils import download_csv
-from recipes.models import (Ingredient,
+from recipes.models import (Favorite,
+                            Ingredient,
                             Recipe,
                             RecipeIngredient,
+                            ShoppingCart,
                             Tag)
 from users.models import Subscription, User
 
@@ -101,13 +103,32 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
-    queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
     permission_classes = (
         permissions.IsAuthenticatedOrReadOnly, AuthorOrReadOnly
     )
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_authenticated:
+            return (Recipe.objects.all().select_related('author')
+                    .annotate(is_favorited=Exists(
+                        Favorite.objects.filter(recipe=OuterRef('pk'))
+                        .select_related('user')
+                    ))
+                    .annotate(is_in_shopping_cart=Exists(ShoppingCart.objects
+                                                         .filter(
+                                                             recipe=OuterRef(
+                                                                 'pk'))
+                                                         .select_related(
+                                                             'user')
+                                                         ))
+                    .prefetch_related('tags', 'ingredients')
+                    )
+        return (Recipe.objects.all().select_related('author')
+                .prefetch_related('tags', 'ingredients'))
 
     def get_serializer_class(self):
         if self.request.method == 'GET':
@@ -121,13 +142,14 @@ class RecipeViewSet(viewsets.ModelViewSet):
         url_name='shopping_cart',
     )
     def get_shopping_cart(self, request, pk):
-        data = {'user': request.user.id, 'recipe': pk}
-        serializer = ShoppingCartSerializer(data=data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(
-            serializer.data, status=status.HTTP_201_CREATED
-        )
+        if request.method == 'POST':
+            data = {'user': request.user.id, 'recipe': pk}
+            serializer = ShoppingCartSerializer(data=data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(
+                serializer.data, status=status.HTTP_201_CREATED
+            )
 
     @get_shopping_cart.mapping.delete
     def delete_shopping_cart(self, request, pk):
@@ -145,13 +167,14 @@ class RecipeViewSet(viewsets.ModelViewSet):
         url_name='favorite',
     )
     def get_favorite(self, request, pk):
-        data = {'user': request.user.id, 'recipe': pk}
-        serializer = FavoriteSerializer(data=data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(
-            serializer.data, status=status.HTTP_201_CREATED
-        )
+        if request.method == 'POST':
+            data = {'user': request.user.id, 'recipe': pk}
+            serializer = FavoriteSerializer(data=data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(
+                serializer.data, status=status.HTTP_201_CREATED
+            )
 
     @get_favorite.mapping.delete
     def delete_favorite(self, request, pk):
