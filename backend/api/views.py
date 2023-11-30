@@ -133,7 +133,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     @get_shopping_cart.mapping.delete
     def delete_shopping_cart(self, request, pk):
         queryset = ShoppingCartSerializer.Meta.model.objects.filter(
-            user=request.user.id,
+            user=request.user,
             recipe=get_object_or_404(Recipe, pk=pk))
         count, _ = queryset.delete()
         if count:
@@ -158,7 +158,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     @get_favorite.mapping.delete
     def delete_favorite(self, request, pk):
         queryset = FavoriteSerializer.Meta.model.objects.filter(
-            user=request.user.id,
+            user=request.user,
             recipe=get_object_or_404(Recipe, pk=pk))
         count, _ = queryset.delete()
         if count:
