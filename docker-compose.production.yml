@@ -11,6 +11,7 @@ services:
     env_file: .env
     volumes:
       - pg_data:/var/lib/postgresql/data
+
   backend:
     image: oleffr/foodgram_backend
     env_file: .env
@@ -18,11 +19,15 @@ services:
       - ./data/:/app/data
       - static:/static/
       - media:/app/media/
+    depends_on:
+      - db
+
   frontend:
     image: oleffr/foodgram_frontend
     command: cp -r /app/result_build/build/. /static/
     volumes:
       - static:/static/
+
   nginx:
     image: oleffr/foodgram_nginx
     env_file: .env
@@ -32,4 +37,6 @@ services:
       - media:/app/media/
     ports:
       - "8090:80"
+    depends_on:
+      - backend
     
