@@ -137,7 +137,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @action(
         detail=True,
-        methods=['post', 'delete'],
+        methods=['post'],
         url_path='shopping_cart',
         url_name='shopping_cart',
     )
@@ -150,21 +150,18 @@ class RecipeViewSet(viewsets.ModelViewSet):
             return Response(
                 serializer.data, status=status.HTTP_201_CREATED
             )
-        model = ShoppingCartSerializer.Meta.model
-        if self.request.user.is_authenticated:
-            queryset = model.objects.filter(user=request.user,
-                                            recipe=get_object_or_404(
-                                                Recipe, pk=pk))
-            if not queryset.exists():
-                return Response(status=status.HTTP_400_BAD_REQUEST)
-            queryset.delete()
-        else:
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
-        return Response(status=status.HTTP_204_NO_CONTENT)
+    @get_shopping_cart.mapping.delete
+    def delete_shopping_cart(self, request, pk):
+        queryset = ShoppingCartSerializer.Meta.model.objects.filter(
+            user=request.user,
+            recipe=get_object_or_404(Recipe, pk=pk))
+        count, _ = queryset.delete()
+        if count:
+            return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
         detail=True,
-        methods=['post', 'delete'],
+        methods=['post'],
         url_path='favorite',
         url_name='favorite',
     )
@@ -177,17 +174,15 @@ class RecipeViewSet(viewsets.ModelViewSet):
             return Response(
                 serializer.data, status=status.HTTP_201_CREATED
             )
-        model = FavoriteSerializer.Meta.model
-        if self.request.user.is_authenticated:
-            queryset = model.objects.filter(user=request.user,
-                                            recipe=get_object_or_404(
-                                                Recipe, pk=pk))
-            if not queryset.exists():
-                return Response(status=status.HTTP_400_BAD_REQUEST)
-            queryset.delete()
-        else:
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
-        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @get_favorite.mapping.delete
+    def delete_favorite(self, request, pk):
+        queryset = FavoriteSerializer.Meta.model.objects.filter(
+            user=request.user,
+            recipe=get_object_or_404(Recipe, pk=pk))
+        count, _ = queryset.delete()
+        if count:
+            return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
         detail=False,
