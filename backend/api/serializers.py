@@ -1,11 +1,14 @@
 from django.db import transaction
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from drf_extra_fields.fields import Base64ImageField
-from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
-                            ShoppingCart, Tag)
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
-from users.models import User, Subscription
+
+from backend.constants import (MAX_AMOUNT_CONST, MAX_COOKING_TIME_CONST,
+                               MIN_AMOUNT_CONST, MIN_COOKING_TIME_CONST)
+from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
+                            ShoppingCart, Tag)
+from users.models import Subscription, User
 
 
 class UserSerializer(UserSerializer):
@@ -31,7 +34,7 @@ class CreateUserSerializer(UserCreateSerializer):
                   'first_name',
                   'last_name',
                   'password')
-        extra_kwargs = {"password": {"write_only": True}}
+        extra_kwargs = {'password': {'write_only': True}}
         read_only_fields = ('id',)
 
 
@@ -143,7 +146,7 @@ class IngredientSerializer(serializers.ModelSerializer):
 
 
 class RecipeIngredientSerializer(serializers.ModelSerializer):
-    id = serializers.ReadOnlyField(source="ingredient.id")
+    id = serializers.ReadOnlyField(source='ingredient.id')
     name = serializers.ReadOnlyField(source='ingredient.name')
     measurement_unit = serializers.ReadOnlyField(
         source='ingredient.measurement_unit')
@@ -158,10 +161,20 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
 
 class CreateRecipeIngredientSerializer(serializers.ModelSerializer):
     id = serializers.PrimaryKeyRelatedField(queryset=Ingredient.objects.all())
+    amount = serializers.ReadOnlyField(
+        source='recipeingredient.amount')
 
     class Meta:
         model = RecipeIngredient
         fields = ('id', 'amount')
+
+    def validate_amount(self, amount):
+        if not (MIN_AMOUNT_CONST <= amount <= MAX_AMOUNT_CONST):
+            raise serializers.ValidationError(
+                'Значение количества ингредиента должно'
+                f'лежать в диапазоне от {MIN_AMOUNT_CONST}'
+                f'до {MAX_AMOUNT_CONST}')
+        return amount
 
 
 class RecipePresentSerializer(serializers.ModelSerializer):
@@ -201,6 +214,8 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
     author = UserSerializer(read_only=True)
     tags = serializers.PrimaryKeyRelatedField(many=True,
                                               queryset=Tag.objects.all())
+    cooking_time = serializers.ReadOnlyField(
+        source='recipe.amount')
 
     class Meta:
         model = Recipe
@@ -212,6 +227,15 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
                   'text',
                   'cooking_time',
                   'author')
+
+    def validate_cooking_time(self, cooking_time):
+        if not (MIN_COOKING_TIME_CONST <= cooking_time
+                <= MAX_COOKING_TIME_CONST):
+            raise serializers.ValidationError(
+                'Значение времени приготовления должно'
+                f'лежать в диапазоне от {MIN_COOKING_TIME_CONST}'
+                f'до {MAX_COOKING_TIME_CONST}')
+        return cooking_time
 
     def make_ingredients_list(self, array_of_ingredients, recipe):
         recipe.ingredients.clear()
@@ -233,7 +257,7 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
         if len(array_of_ingredients) != len(set(array_of_ingredients)):
             raise serializers.ValidationError(
                 'Ингредиенты не могут повторяться')
-        if len(array_of_ingredients) == 0:
+        if not array_of_ingredients:
             raise serializers.ValidationError(
                 'У рецепта должен быть хотя бы один ингридиент')
         return ingredients
@@ -266,7 +290,7 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
         if len(tags) != len(set(tags)):
             raise serializers.ValidationError(
                 'Теги не могут повторяться')
-        if len(tags) == 0:
+        if not tags:
             raise serializers.ValidationError(
                 'У рецепта должен быть хотя бы один тэг')
         return tags
