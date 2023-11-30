@@ -137,9 +137,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @action(
         detail=True,
-        methods=['post'],
-        url_path='shopping_cart',
-        url_name='shopping_cart',
+        methods=['post']
     )
     def get_shopping_cart(self, request, pk):
         serializer = ShoppingCartSerializer(data={
@@ -161,9 +159,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @action(
         detail=True,
-        methods=['post'],
-        url_path='favorite',
-        url_name='favorite',
+        methods=['post']
     )
     def get_favorite(self, request, pk):
         serializer = FavoriteSerializer(data={
