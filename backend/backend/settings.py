@@ -128,4 +128,4 @@ DJOSER = {
     },
 }
 
-CSRF_TRUSTED_ORIGINS = ['[undefined](https://*.foodgram-oleffr.hopto.org)']
+CSRF_TRUSTED_ORIGINS = ['(https://*.foodgram-oleffr.hopto.org)']
