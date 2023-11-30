@@ -23,6 +23,9 @@ docker compose -f docker-compose.yml exec backend cp -r /app/collected_static/. 
 docker compose -f docker-compose.yml exec backend python manage.py migrate
 ```
 
+## Отличие версий
+Этот проект поддерживает как production-версию проекта, в которой настроена автомазация при помощи docker и git actions, так и локальную версию. Для их запуска необходимо использовать docker-compose.production.yml и docker-compose.yml соответственно
+
 ## Использованные пакеты приложений
 
 >Django                       4.2.6

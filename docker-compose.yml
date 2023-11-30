@@ -41,3 +41,4 @@ services:
       - media:/var/www/media/
     depends_on:
       - backend
+      - frontend

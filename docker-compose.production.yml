@@ -39,4 +39,5 @@ services:
       - "8090:80"
     depends_on:
       - backend
+      - frontend
     
