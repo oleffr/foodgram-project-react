@@ -228,15 +228,6 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
                   'cooking_time',
                   'author')
 
-    def validate(self, data):
-        if not (MIN_COOKING_TIME_CONST <= data['cooking_time']
-                <= MAX_COOKING_TIME_CONST):
-            raise serializers.ValidationError(
-                'Значение времени приготовления должно'
-                f'лежать в диапазоне от {MIN_COOKING_TIME_CONST}'
-                f'до {MAX_COOKING_TIME_CONST}')
-        return data
-
     def make_ingredients_list(self, array_of_ingredients, recipe):
         recipe.ingredients.clear()
         ingredients_list = []
@@ -286,20 +277,27 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 'У рецепта должен быть хотя бы один тэг и ингридиент')
 
-    def validate_tags(self, tags):
+    def validate(self, data):
+        if not (MIN_COOKING_TIME_CONST <= data['cooking_time']
+                <= MAX_COOKING_TIME_CONST):
+            raise serializers.ValidationError(
+                'Значение времени приготовления должно'
+                f'лежать в диапазоне от {MIN_COOKING_TIME_CONST}'
+                f'до {MAX_COOKING_TIME_CONST}')
+
+        tags = data['tags']
         if len(tags) != len(set(tags)):
             raise serializers.ValidationError(
                 'Теги не могут повторяться')
         if not tags:
             raise serializers.ValidationError(
                 'У рецепта должен быть хотя бы один тэг')
-        return tags
 
-    def validate_image(self, image):
+        image = data['image']
         if not image:
             raise serializers.ValidationError(
                 'Ингредиенты не должны быть без картинки')
-        return image
+        return data
 
     def to_representation(self, recipe):
         return RecipeSerializer(recipe).data
