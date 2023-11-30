@@ -128,4 +128,7 @@ DJOSER = {
     },
 }
 
-CSRF_TRUSTED_ORIGINS = ['(https://*.foodgram-oleffr.hopto.org)']
+CSRF_TRUSTED_ORIGINS = ['https://*.foodgram-oleffr.hopto.org']
+CORS_ORIGIN_WHITELIST = (
+    'https://*.foodgram-oleffr.hopto.org'
+)
