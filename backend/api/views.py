@@ -150,6 +150,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             return Response(
                 serializer.data, status=status.HTTP_201_CREATED
             )
+
     @get_shopping_cart.mapping.delete
     def delete_shopping_cart(self, request, pk):
         queryset = ShoppingCartSerializer.Meta.model.objects.filter(
