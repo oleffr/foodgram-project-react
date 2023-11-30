@@ -1,2 +1,2 @@
-ADMIN_USERNAME = admin
+ADMIN_USERNAME = oleffr15@yandex.ru
 ADMIN_PASSWORD = Nitrogen14
