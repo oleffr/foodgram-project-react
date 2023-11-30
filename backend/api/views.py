@@ -98,16 +98,13 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
+    queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
     permission_classes = (
         permissions.IsAuthenticatedOrReadOnly, AuthorOrReadOnly
     )
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
-
-    def get_queryset(self):
-        return (Recipe.objects.all().select_related('author')
-                .prefetch_related('tags', 'ingredients'))
 
     def get_serializer_class(self):
         if self.request.method == 'GET':
