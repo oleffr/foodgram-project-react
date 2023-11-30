@@ -161,20 +161,20 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
 
 class CreateRecipeIngredientSerializer(serializers.ModelSerializer):
     id = serializers.PrimaryKeyRelatedField(queryset=Ingredient.objects.all())
-    amount = serializers.ReadOnlyField(
-        source='recipeingredient.amount')
+    # amount = serializers.ReadOnlyField(
+    #     source='recipeingredient.amount')
 
     class Meta:
         model = RecipeIngredient
         fields = ('id', 'amount')
 
-    def validate_amount(self, amount):
-        if not (MIN_AMOUNT_CONST <= amount <= MAX_AMOUNT_CONST):
-            raise serializers.ValidationError(
-                'Значение количества ингредиента должно'
-                f'лежать в диапазоне от {MIN_AMOUNT_CONST}'
-                f'до {MAX_AMOUNT_CONST}')
-        return amount
+    # def validate_amount(self, amount):
+    #     if not (MIN_AMOUNT_CONST <= amount <= MAX_AMOUNT_CONST):
+    #         raise serializers.ValidationError(
+    #             'Значение количества ингредиента должно'
+    #             f'лежать в диапазоне от {MIN_AMOUNT_CONST}'
+    #             f'до {MAX_AMOUNT_CONST}')
+    #     return amount
 
 
 class RecipePresentSerializer(serializers.ModelSerializer):
