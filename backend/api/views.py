@@ -1,27 +1,29 @@
-import csv
-
 from django.db.models import Exists, OuterRef, Sum
-from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
-from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
-                            ShoppingCart, Tag)
 from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from users.models import User, Subscription
 
-from .filters import IngredientFilter, RecipeFilter
-from .permissions import AuthorOrReadOnly
-from .serializers import (CreateRecipeSerializer, UserSerializer,
-                          FavoriteSerializer, IngredientSerializer,
-                          RecipeSerializer, ShoppingCartSerializer,
-                          SubscriptionSerializer,
-                          SubscriptionPresentSerializer,
-                          TagSerializer)
+from api.filters import IngredientFilter, RecipeFilter
+from api.permissions import AuthorOrReadOnly
+from api.serializers import (CreateRecipeSerializer, FavoriteSerializer,
+                             IngredientSerializer, RecipeSerializer,
+                             ShoppingCartSerializer,
+                             SubscriptionPresentSerializer,
+                             SubscriptionSerializer, TagSerializer,
+                             UserSerializer)
+from api.utils import download_csv
+from recipes.models import (Favorite,
+                            Ingredient,
+                            Recipe,
+                            RecipeIngredient,
+                            ShoppingCart,
+                            Tag)
+from users.models import Subscription, User
 
 
 class UserViewSet(UserViewSet):
@@ -46,24 +48,28 @@ class UserViewSet(UserViewSet):
 
     @action(
         detail=True,
-        methods=['post', 'delete'],
+        methods=['post'],
         url_path='subscribe',
         url_name='subscribe',
     )
     def to_subscribe(self, request, id):
         author = get_object_or_404(User, id=id)
         if request.method == 'POST':
-            data = {'subscriber': request.user.id, 'author': author.id}
-            serializer = self.get_serializer(data=data)
+            serializer = self.get_serializer(data={
+                'subscriber': request.user.id,
+                'author': author.id})
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(
                 serializer.data, status=status.HTTP_201_CREATED
             )
-        subscription = Subscription.objects.filter(subscriber=request.user,
-                                                   author=author)
-        if not subscription.exists():
-            raise ValidationError('Такой подписки нет')
+
+    @to_subscribe.mapping.delete
+    def delete_subscription(self, request, id):
+        author = get_object_or_404(User, id=id)
+        subscription = get_object_or_404(Subscription.objects.filter(
+                                         subscriber=request.user,
+                                         author=author))
         subscription.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -75,29 +81,24 @@ class UserViewSet(UserViewSet):
     )
     def get_subscription_list(self, request):
         authors = User.objects.filter(author__subscriber=request.user)
-        result_pages = self.paginate_queryset(
-            queryset=authors
-        )
-        serializer = self.get_serializer(result_pages, many=True)
-        return self.get_paginated_response(serializer.data)
-
-
-class TagViewSet(viewsets.ReadOnlyModelViewSet):
-
-    queryset = Tag.objects.all()
-    serializer_class = TagSerializer
-    pagination_class = None
-    permission_classes = (AllowAny, )
+        return self.get_paginated_response(self.get_serializer(
+            self.paginate_queryset(queryset=authors), many=True).data)
 
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
-
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     filter_backends = (DjangoFilterBackend,)
     search_fields = ['name']
     pagination_class = None
     filterset_class = IngredientFilter
+    permission_classes = (AllowAny, )
+
+
+class TagViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Tag.objects.all()
+    serializer_class = TagSerializer
+    pagination_class = None
     permission_classes = (AllowAny, )
 
 
@@ -136,7 +137,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @action(
         detail=True,
-        methods=['post', 'delete'],
+        methods=['post'],
         url_path='shopping_cart',
         url_name='shopping_cart',
     )
@@ -149,21 +150,19 @@ class RecipeViewSet(viewsets.ModelViewSet):
             return Response(
                 serializer.data, status=status.HTTP_201_CREATED
             )
-        model = ShoppingCartSerializer.Meta.model
-        if self.request.user.is_authenticated:
-            queryset = model.objects.filter(user=request.user,
-                                            recipe=get_object_or_404(
-                                                Recipe, pk=pk))
-            if not queryset.exists():
-                return Response(status=status.HTTP_400_BAD_REQUEST)
-            queryset.delete()
-        else:
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
-        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @get_shopping_cart.mapping.delete
+    def delete_shopping_cart(self, request, pk):
+        queryset = ShoppingCartSerializer.Meta.model.objects.filter(
+            user=request.user,
+            recipe=get_object_or_404(Recipe, pk=pk))
+        count, _ = queryset.delete()
+        if count:
+            return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
         detail=True,
-        methods=['post', 'delete'],
+        methods=['post'],
         url_path='favorite',
         url_name='favorite',
     )
@@ -176,17 +175,15 @@ class RecipeViewSet(viewsets.ModelViewSet):
             return Response(
                 serializer.data, status=status.HTTP_201_CREATED
             )
-        model = FavoriteSerializer.Meta.model
-        if self.request.user.is_authenticated:
-            queryset = model.objects.filter(user=request.user,
-                                            recipe=get_object_or_404(
-                                                Recipe, pk=pk))
-            if not queryset.exists():
-                return Response(status=status.HTTP_400_BAD_REQUEST)
-            queryset.delete()
-        else:
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
-        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @get_favorite.mapping.delete
+    def delete_favorite(self, request, pk):
+        queryset = FavoriteSerializer.Meta.model.objects.filter(
+            user=request.user,
+            recipe=get_object_or_404(Recipe, pk=pk))
+        count, _ = queryset.delete()
+        if count:
+            return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
         detail=False,
@@ -195,23 +192,16 @@ class RecipeViewSet(viewsets.ModelViewSet):
         url_name='download_shopping_cart',
     )
     def download_shopping_cart(self, request):
-        ingredients_cart = (
+        queryset = (
             RecipeIngredient.objects.filter(
                 recipe__shopping_cart__user=request.user
             ).values(
                 'ingredient__name',
                 'ingredient__measurement_unit',
-            ).annotate(ingredient_value=Sum('amount')
+            ).annotate(amount=Sum('amount')
                        ).order_by('ingredient__name')
         )
-        if not ingredients_cart.exists():
+        if not queryset.exists():
             raise ValidationError('В списке покупок нет добавленных рецептов')
-        response = HttpResponse(
-            content_type="text/csv",
-            headers={'Content-Disposition':
-                     'attachment;filename="shopping_cart.csv"'},)
-        writer = csv.DictWriter(response,
-                                fieldnames=ingredients_cart.first().keys())
-        writer.writeheader()
-        writer.writerows(ingredients_cart)
+        response = download_csv(queryset)
         return response
