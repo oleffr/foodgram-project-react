@@ -22,6 +22,7 @@ from api.serializers import (CreateRecipeSerializer, FavoriteSerializer,
 from recipes.models import (Favorite,
                             Ingredient,
                             Recipe,
+                            RecipeIngredient,
                             ShoppingCart,
                             Tag)
 from users.models import Subscription, User
@@ -145,17 +146,16 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def get_shopping_cart(self, request, pk):
         if request.method == 'POST':
             data = {'user': request.user.id, 'recipe': pk}
-            ShoppingCartSerializer(data=data).is_valid(raise_exception=True)
-            ShoppingCartSerializer(data=data).save()
+            serializer = ShoppingCartSerializer(data=data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
             return Response(
-                ShoppingCartSerializer(data=data).data,
-                status=status.HTTP_201_CREATED
+                serializer.data, status=status.HTTP_201_CREATED
             )
-        model = ShoppingCartSerializer.Meta.model
         if self.request.user.is_authenticated:
-            queryset = model.objects.filter(user=request.user,
-                                            recipe=get_object_or_404(
-                                                Recipe, pk=pk))
+            queryset = ShoppingCartSerializer.Meta.model.objects.filter(
+                user=request.user,
+                recipe=get_object_or_404(Recipe, pk=pk))
             if not queryset.exists():
                 return Response(status=status.HTTP_400_BAD_REQUEST)
             queryset.delete()
@@ -172,17 +172,16 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def get_favorite(self, request, pk):
         if request.method == 'POST':
             data = {'user': request.user.id, 'recipe': pk}
-            FavoriteSerializer(data=data).is_valid(raise_exception=True)
-            FavoriteSerializer(data=data).save()
+            serializer = FavoriteSerializer(data=data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
             return Response(
-                FavoriteSerializer(data=data).data,
-                status=status.HTTP_201_CREATED
+                serializer.data, status=status.HTTP_201_CREATED
             )
-        model = FavoriteSerializer.Meta.model
         if self.request.user.is_authenticated:
-            queryset = model.objects.filter(user=request.user,
-                                            recipe=get_object_or_404(
-                                                Recipe, pk=pk))
+            queryset = FavoriteSerializer.Meta.model.objects.filter(
+                user=request.user,
+                recipe=get_object_or_404(Recipe, pk=pk))
             if not queryset.exists():
                 return Response(status=status.HTTP_400_BAD_REQUEST)
             queryset.delete()
@@ -197,23 +196,23 @@ class RecipeViewSet(viewsets.ModelViewSet):
         url_name='download_shopping_cart',
     )
     def download_shopping_cart(self, request):
-        ingredients_cart = (
-            Recipe.ingredients.through.objects.filter(
+        queryset = (
+            RecipeIngredient.objects.filter(
                 recipe__shopping_cart__user=request.user
             ).values(
                 'ingredient__name',
                 'ingredient__measurement_unit',
-            ).annotate(amount=Sum('amount')
+            ).annotate(ingredient_value=Sum('amount')
                        ).order_by('ingredient__name')
         )
-        if not ingredients_cart.exists():
+        if not queryset.exists():
             raise ValidationError('В списке покупок нет добавленных рецептов')
         response = HttpResponse(
-            content_type="text/csv",
+            content_type='text/csv',
             headers={'Content-Disposition':
                      'attachment;filename="shopping_cart.csv"'},)
         writer = csv.DictWriter(response,
-                                fieldnames=ingredients_cart.first().keys())
+                                fieldnames=queryset.first().keys())
         writer.writeheader()
-        writer.writerows(ingredients_cart)
+        writer.writerows(queryset)
         return response
