@@ -96,7 +96,9 @@ class SubscriptionPresentSerializer(UserSerializer):
 
 
 class FavoriteSerializer(serializers.ModelSerializer):
-    user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
+    user = serializers.PrimaryKeyRelatedField(
+        read_only=True,
+        default=serializers.CurrentUserDefault())
     recipe = serializers.PrimaryKeyRelatedField(queryset=Recipe.objects.all())
 
     class Meta:
@@ -126,7 +128,9 @@ class TagSerializer(serializers.ModelSerializer):
 
 class ShoppingCartSerializer(serializers.ModelSerializer):
     recipe = serializers.PrimaryKeyRelatedField(queryset=Recipe.objects.all())
-    user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
+    user = serializers.PrimaryKeyRelatedField(
+        read_only=True,
+        default=serializers.CurrentUserDefault())
 
     class Meta:
         model = ShoppingCart
