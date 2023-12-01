@@ -1,4 +1,7 @@
+import csv
+
 from django.db.models import Exists, OuterRef, Sum
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
@@ -16,7 +19,6 @@ from api.serializers import (CreateRecipeSerializer, FavoriteSerializer,
                              SubscriptionPresentSerializer,
                              SubscriptionSerializer, TagSerializer,
                              UserSerializer)
-from api.utils import download_csv
 from recipes.models import (Favorite,
                             Ingredient,
                             Recipe,
@@ -194,17 +196,23 @@ class RecipeViewSet(viewsets.ModelViewSet):
         url_name='download_shopping_cart',
     )
     def download_shopping_cart(self, request):
-        user = request.user
-        ingredients = (
+        ingredients_cart = (
             RecipeIngredient.objects.filter(
-                recipe__shopping_cart__user=user
+                recipe__shopping_cart__user=request.user
             ).values(
                 'ingredient__name',
                 'ingredient__measurement_unit',
             ).annotate(ingredient_value=Sum('amount')
                        ).order_by('ingredient__name')
         )
-        if not ingredients.exists():
-            raise ValidationError('Корзина пуста')
-        response = download_csv(ingredients)
+        if not ingredients_cart.exists():
+            raise ValidationError('В списке покупок нет добавленных рецептов')
+        response = HttpResponse(
+            content_type="text/csv",
+            headers={'Content-Disposition':
+                     'attachment;filename="shopping_cart.csv"'},)
+        writer = csv.DictWriter(response,
+                                fieldnames=ingredients_cart.first().keys())
+        writer.writeheader()
+        writer.writerows(ingredients_cart)
         return response
