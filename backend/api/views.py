@@ -194,23 +194,17 @@ class RecipeViewSet(viewsets.ModelViewSet):
         url_name='download_shopping_cart',
     )
     def download_shopping_cart(self, request):
-        if not (
+        user = request.user
+        ingredients = (
             RecipeIngredient.objects.filter(
-                recipe__shopping_cart__user=request.user
+                recipe__shopping_cart__user=user
             ).values(
                 'ingredient__name',
                 'ingredient__measurement_unit',
-            ).annotate(amount=Sum('amount')
-                       ).order_by('ingredient__name')
-        ).exists():
-            raise ValidationError('В списке покупок нет добавленных рецептов')
-        response = download_csv(
-            RecipeIngredient.objects.filter(
-                recipe__shopping_cart__user=request.user
-            ).values(
-                'ingredient__name',
-                'ingredient__measurement_unit',
-            ).annotate(amount=Sum('amount')
+            ).annotate(ingredient_value=Sum('amount')
                        ).order_by('ingredient__name')
         )
+        if not ingredients.exists():
+            raise ValidationError('Корзина пуста')
+        response = download_csv(ingredients)
         return response
