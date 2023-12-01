@@ -101,27 +101,13 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
+    queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
     permission_classes = (
         permissions.IsAuthenticatedOrReadOnly, AuthorOrReadOnly
     )
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
-
-    def get_queryset(self):
-        user = self.request.user
-        if user.is_authenticated:
-            return (Recipe.objects.all().select_related('author')
-                    .annotate(is_favorited=Exists(
-                        user.favorite_set.filter(recipe=OuterRef('pk'))
-                    ))
-                    .annotate(is_in_shopping_cart=Exists(
-                        user.shoppingcart_set.filter(recipe=OuterRef('pk'))
-                    ))
-                    .prefetch_related('tags', 'ingredients')
-                    )
-        return (Recipe.objects.all().select_related('author')
-                .prefetch_related('tags', 'ingredients'))
 
     def get_serializer_class(self):
         if self.request.method == 'GET':
