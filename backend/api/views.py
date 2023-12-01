@@ -15,7 +15,7 @@ from rest_framework.response import Response
 from users.models import User, Subscription
 
 from .filters import IngredientFilter, RecipeFilter
-from .permissions import AuthorOrAdminOrReadOnly
+from .permissions import AuthorOrReadOnly
 from .serializers import (CreateRecipeSerializer, UserSerializer,
                           FavoriteSerializer, IngredientSerializer,
                           RecipeSerializer, ShoppingCartSerializer,
@@ -104,7 +104,7 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
 class RecipeViewSet(viewsets.ModelViewSet):
     serializer_class = RecipeSerializer
     permission_classes = (
-        permissions.IsAuthenticatedOrReadOnly, AuthorOrAdminOrReadOnly
+        permissions.IsAuthenticatedOrReadOnly, AuthorOrReadOnly
     )
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
