@@ -143,23 +143,22 @@ class RecipeViewSet(viewsets.ModelViewSet):
     )
     def get_shopping_cart(self, request, pk):
         if request.method == 'POST':
-            recipe = get_object_or_404(Recipe, pk=pk)
-            data = {'recipe': recipe.id}
+            data = {'user': request.user.id, 'recipe': pk}
             serializer = ShoppingCartSerializer(data=data)
             serializer.is_valid(raise_exception=True)
-            serializer.save(user=request.user)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            serializer.save()
+            return Response(
+                serializer.data, status=status.HTTP_201_CREATED
+            )
 
     @get_shopping_cart.mapping.delete
     def delete_shopping_cart(self, request, pk):
-        recipe = get_object_or_404(Recipe, pk=pk)
-        queryset = request.user.shoppingcart_set.filter(
-            recipe=recipe
-        )
+        queryset = ShoppingCartSerializer.Meta.model.objects.filter(
+            user=request.user,
+            recipe=get_object_or_404(Recipe, pk=pk))
         count, _ = queryset.delete()
-        if not count:
+        if count:
             return Response(status=status.HTTP_204_NO_CONTENT)
-        raise ValidationError('Этот рецепт не в корзине')
 
     @action(
         detail=True,
@@ -183,9 +182,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
             user=request.user,
             recipe=get_object_or_404(Recipe, pk=pk))
         count, _ = queryset.delete()
-        if not count:
+        if count:
             return Response(status=status.HTTP_204_NO_CONTENT)
-        raise ValidationError('Этот рецепт не в избранном')
 
     @action(
         detail=False,
@@ -194,7 +192,17 @@ class RecipeViewSet(viewsets.ModelViewSet):
         url_name='download_shopping_cart',
     )
     def download_shopping_cart(self, request):
-        queryset = (
+        if not (
+            RecipeIngredient.objects.filter(
+                recipe__shopping_cart__user=request.user
+            ).values(
+                'ingredient__name',
+                'ingredient__measurement_unit',
+            ).annotate(amount=Sum('amount')
+                       ).order_by('ingredient__name')
+        ).exists():
+            raise ValidationError('В списке покупок нет добавленных рецептов')
+        response = download_csv(
             RecipeIngredient.objects.filter(
                 recipe__shopping_cart__user=request.user
             ).values(
@@ -203,7 +211,4 @@ class RecipeViewSet(viewsets.ModelViewSet):
             ).annotate(amount=Sum('amount')
                        ).order_by('ingredient__name')
         )
-        if not queryset.exists():
-            raise ValidationError('В списке покупок нет добавленных рецептов')
-        response = download_csv(queryset)
         return response

@@ -126,9 +126,7 @@ class TagSerializer(serializers.ModelSerializer):
 
 class ShoppingCartSerializer(serializers.ModelSerializer):
     recipe = serializers.PrimaryKeyRelatedField(queryset=Recipe.objects.all())
-    user = serializers.PrimaryKeyRelatedField(
-        read_only=True,
-        default=serializers.CurrentUserDefault())
+    user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
 
     class Meta:
         model = ShoppingCart
@@ -140,10 +138,7 @@ class ShoppingCartSerializer(serializers.ModelSerializer):
                       ]
 
     def to_representation(self, instance):
-        return RecipePresentSerializer(
-            instance.recipe,
-            context=self.context
-        ).data
+        return RecipePresentSerializer(instance.recipe).data
 
 
 class IngredientSerializer(serializers.ModelSerializer):
