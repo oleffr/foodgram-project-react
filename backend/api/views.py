@@ -157,7 +157,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             user=request.user,
             recipe=get_object_or_404(Recipe, pk=pk))
         count, _ = queryset.delete()
-        if count:
+        if not count:
             return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
@@ -182,7 +182,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             user=request.user,
             recipe=get_object_or_404(Recipe, pk=pk))
         count, _ = queryset.delete()
-        if count:
+        if not count:
             return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
