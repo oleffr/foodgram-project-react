@@ -11,9 +11,9 @@ class RecipeFilter(d_filters.FilterSet):
     )
     is_favorited = d_filters.BooleanFilter(method='get_is_favorited',
                                            field_name='is_favorited')
-    in_cart = d_filters.BooleanFilter(
+    is_in_shopping_cart = d_filters.BooleanFilter(
         method='get_in_cart',
-        field_name='in_cart',
+        field_name='is_in_shopping_cart',
     )
 
     class Meta:
@@ -21,7 +21,7 @@ class RecipeFilter(d_filters.FilterSet):
         fields = ('author',
                   'tags',
                   'is_favorited',
-                  'in_cart')
+                  'is_in_shopping_cart')
 
     def get_in_cart(self, queryset, name, value):
         if value:

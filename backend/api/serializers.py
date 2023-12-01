@@ -209,6 +209,11 @@ class RecipeSerializer(serializers.ModelSerializer):
                   'text',
                   'cooking_time')
 
+    # def get_is_in_shopping_cart(self, object):
+    #     request = self.context.get('request')
+    #     return (request and request.user.is_authenticated
+    #             and object.recipe.filter(user=request.user).exists())
+
 
 class CreateRecipeSerializer(serializers.ModelSerializer):
     ingredients = CreateRecipeIngredientSerializer(many=True)
