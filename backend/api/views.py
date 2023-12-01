@@ -12,6 +12,7 @@ from api.filters import IngredientFilter, RecipeFilter
 from api.permissions import AuthorOrReadOnly
 from api.serializers import (CreateRecipeSerializer, FavoriteSerializer,
                              IngredientSerializer, RecipeSerializer,
+                             ShoppingCartSerializer,
                              SubscriptionPresentSerializer,
                              SubscriptionSerializer, TagSerializer,
                              UserSerializer)
@@ -144,7 +145,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         if request.method == 'POST':
             recipe = get_object_or_404(Recipe, pk=pk)
             data = {'recipe': recipe.id}
-            serializer = self.get_serializer(data=data)
+            serializer = ShoppingCartSerializer(data=data)
             serializer.is_valid(raise_exception=True)
             serializer.save(user=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
