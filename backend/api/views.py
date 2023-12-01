@@ -1,4 +1,7 @@
+import csv
+
 from django.db.models import Exists, OuterRef, Sum
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
@@ -16,11 +19,9 @@ from api.serializers import (CreateRecipeSerializer, FavoriteSerializer,
                              SubscriptionPresentSerializer,
                              SubscriptionSerializer, TagSerializer,
                              UserSerializer)
-from api.utils import download_csv
 from recipes.models import (Favorite,
                             Ingredient,
                             Recipe,
-                            RecipeIngredient,
                             ShoppingCart,
                             Tag)
 from users.models import Subscription, User
@@ -137,53 +138,57 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @action(
         detail=True,
-        methods=['post'],
+        methods=['post', 'delete'],
         url_path='shopping_cart',
         url_name='shopping_cart',
     )
     def get_shopping_cart(self, request, pk):
         if request.method == 'POST':
             data = {'user': request.user.id, 'recipe': pk}
-            serializer = ShoppingCartSerializer(data=data)
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
+            ShoppingCartSerializer(data=data).is_valid(raise_exception=True)
+            ShoppingCartSerializer(data=data).save()
             return Response(
-                serializer.data, status=status.HTTP_201_CREATED
+                ShoppingCartSerializer(data=data).data,
+                status=status.HTTP_201_CREATED
             )
-
-    @get_shopping_cart.mapping.delete
-    def delete_shopping_cart(self, request, pk):
-        queryset = ShoppingCartSerializer.Meta.model.objects.filter(
-            user=request.user,
-            recipe=get_object_or_404(Recipe, pk=pk))
-        count, _ = queryset.delete()
-        if count:
-            return Response(status=status.HTTP_204_NO_CONTENT)
+        model = ShoppingCartSerializer.Meta.model
+        if self.request.user.is_authenticated:
+            queryset = model.objects.filter(user=request.user,
+                                            recipe=get_object_or_404(
+                                                Recipe, pk=pk))
+            if not queryset.exists():
+                return Response(status=status.HTTP_400_BAD_REQUEST)
+            queryset.delete()
+        else:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
         detail=True,
-        methods=['post'],
+        methods=['post', 'delete'],
         url_path='favorite',
         url_name='favorite',
     )
     def get_favorite(self, request, pk):
         if request.method == 'POST':
             data = {'user': request.user.id, 'recipe': pk}
-            serializer = FavoriteSerializer(data=data)
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
+            FavoriteSerializer(data=data).is_valid(raise_exception=True)
+            FavoriteSerializer(data=data).save()
             return Response(
-                serializer.data, status=status.HTTP_201_CREATED
+                FavoriteSerializer(data=data).data,
+                status=status.HTTP_201_CREATED
             )
-
-    @get_favorite.mapping.delete
-    def delete_favorite(self, request, pk):
-        queryset = FavoriteSerializer.Meta.model.objects.filter(
-            user=request.user,
-            recipe=get_object_or_404(Recipe, pk=pk))
-        count, _ = queryset.delete()
-        if count:
-            return Response(status=status.HTTP_204_NO_CONTENT)
+        model = FavoriteSerializer.Meta.model
+        if self.request.user.is_authenticated:
+            queryset = model.objects.filter(user=request.user,
+                                            recipe=get_object_or_404(
+                                                Recipe, pk=pk))
+            if not queryset.exists():
+                return Response(status=status.HTTP_400_BAD_REQUEST)
+            queryset.delete()
+        else:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
         detail=False,
@@ -192,18 +197,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
         url_name='download_shopping_cart',
     )
     def download_shopping_cart(self, request):
-        if not (
-            RecipeIngredient.objects.filter(
-                recipe__shopping_cart__user=request.user
-            ).values(
-                'ingredient__name',
-                'ingredient__measurement_unit',
-            ).annotate(amount=Sum('amount')
-                       ).order_by('ingredient__name')
-        ).exists():
-            raise ValidationError('В списке покупок нет добавленных рецептов')
-        response = download_csv(
-            RecipeIngredient.objects.filter(
+        ingredients_cart = (
+            Recipe.ingredients.through.objects.filter(
                 recipe__shopping_cart__user=request.user
             ).values(
                 'ingredient__name',
@@ -211,4 +206,14 @@ class RecipeViewSet(viewsets.ModelViewSet):
             ).annotate(amount=Sum('amount')
                        ).order_by('ingredient__name')
         )
+        if not ingredients_cart.exists():
+            raise ValidationError('В списке покупок нет добавленных рецептов')
+        response = HttpResponse(
+            content_type="text/csv",
+            headers={'Content-Disposition':
+                     'attachment;filename="shopping_cart.csv"'},)
+        writer = csv.DictWriter(response,
+                                fieldnames=ingredients_cart.first().keys())
+        writer.writeheader()
+        writer.writerows(ingredients_cart)
         return response
