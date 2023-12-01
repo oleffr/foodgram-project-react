@@ -12,7 +12,6 @@ from api.filters import IngredientFilter, RecipeFilter
 from api.permissions import AuthorOrReadOnly
 from api.serializers import (CreateRecipeSerializer, FavoriteSerializer,
                              IngredientSerializer, RecipeSerializer,
-                             ShoppingCartSerializer,
                              SubscriptionPresentSerializer,
                              SubscriptionSerializer, TagSerializer,
                              UserSerializer)
@@ -143,19 +142,19 @@ class RecipeViewSet(viewsets.ModelViewSet):
     )
     def get_shopping_cart(self, request, pk):
         if request.method == 'POST':
-            data = {'user': request.user.id, 'recipe': pk}
-            serializer = ShoppingCartSerializer(data=data)
+            recipe = get_object_or_404(Recipe, pk=pk)
+            data = {'recipe': recipe.id}
+            serializer = self.get_serializer(data=data)
             serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return Response(
-                serializer.data, status=status.HTTP_201_CREATED
-            )
+            serializer.save(user=request.user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @get_shopping_cart.mapping.delete
     def delete_shopping_cart(self, request, pk):
-        queryset = ShoppingCartSerializer.Meta.model.objects.filter(
-            user=request.user,
-            recipe=get_object_or_404(Recipe, pk=pk))
+        recipe = get_object_or_404(Recipe, pk=pk)
+        queryset = request.user.shoppingcart_set.filter(
+            recipe=recipe
+        )
         count, _ = queryset.delete()
         if not count:
             return Response(status=status.HTTP_204_NO_CONTENT)
