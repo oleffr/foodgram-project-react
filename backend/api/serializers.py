@@ -5,12 +5,6 @@ from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
 from users.models import Subscription, User
-
-from backend.constants import (MAX_AMOUNT_CONST,
-                               MAX_COOKING_TIME_CONST,
-                               MIN_AMOUNT_CONST,
-                               MIN_COOKING_TIME_CONST
-                               )
 from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
                             ShoppingCart, Tag)
 
@@ -170,14 +164,6 @@ class CreateRecipeIngredientSerializer(serializers.ModelSerializer):
         model = RecipeIngredient
         fields = ('id', 'amount')
 
-    def validate(self, data):
-        if not (MIN_AMOUNT_CONST <= data['amount'] <= MAX_AMOUNT_CONST):
-            raise serializers.ValidationError(
-                'Значение количества ингредиента должно'
-                f'лежать в диапазоне от {MIN_AMOUNT_CONST}'
-                f'до {MAX_AMOUNT_CONST}')
-        return data
-
 
 class RecipePresentSerializer(serializers.ModelSerializer):
     class Meta:
@@ -227,15 +213,6 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
                   'text',
                   'cooking_time',
                   'author')
-
-    def validate(self, data):
-        if not (MIN_COOKING_TIME_CONST <= data['cooking_time']
-                <= MAX_COOKING_TIME_CONST):
-            raise serializers.ValidationError(
-                'Значение времени приготовления должно'
-                f'лежать в диапазоне от {MIN_COOKING_TIME_CONST}'
-                f'до {MAX_COOKING_TIME_CONST}')
-        return data
 
     def make_ingredients_list(self, array_of_ingredients, recipe):
         recipe.ingredients.clear()
