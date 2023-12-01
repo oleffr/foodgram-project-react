@@ -17,9 +17,11 @@ from api.serializers import (CreateRecipeSerializer, FavoriteSerializer,
                              SubscriptionSerializer, TagSerializer,
                              UserSerializer)
 from api.utils import download_csv
-from recipes.models import (Ingredient,
+from recipes.models import (Favorite,
+                            Ingredient,
                             Recipe,
                             RecipeIngredient,
+                            ShoppingCart,
                             Tag)
 from users.models import Subscription, User
 
@@ -110,18 +112,23 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        queryset = (Recipe.objects.all().select_related('author')
-                    .prefetch_related('tags', 'ingredients'))
         if user.is_authenticated:
-            queryset = queryset.annotate(
-                is_favorited=Exists(user.favorite
-                                    .filter(
-                                        recipe=OuterRef('pk'))))
-            queryset = queryset.annotate(
-                is_favorited=Exists(user.shopping_cart
-                                    .filter(
-                                        recipe=OuterRef('pk'))))
-        return queryset
+            return (Recipe.objects.all().select_related('author')
+                    .annotate(is_favorited=Exists(
+                        Favorite.objects.filter(recipe=OuterRef('pk'))
+                        .select_related('user')
+                    ))
+                    .annotate(is_in_shopping_cart=Exists(ShoppingCart.objects
+                                                         .filter(
+                                                             recipe=OuterRef(
+                                                                 'pk'))
+                                                         .select_related(
+                                                             'user')
+                                                         ))
+                    .prefetch_related('tags', 'ingredients')
+                    )
+        return (Recipe.objects.all().select_related('author')
+                .prefetch_related('tags', 'ingredients'))
 
     def get_serializer_class(self):
         if self.request.method == 'GET':
