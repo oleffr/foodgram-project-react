@@ -159,6 +159,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         count, _ = queryset.delete()
         if not count:
             return Response(status=status.HTTP_204_NO_CONTENT)
+        raise ValidationError('Этот рецепт не в корзине')
 
     @action(
         detail=True,
@@ -184,6 +185,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         count, _ = queryset.delete()
         if not count:
             return Response(status=status.HTTP_204_NO_CONTENT)
+        raise ValidationError('Этот рецепт не в избранном')
 
     @action(
         detail=False,
